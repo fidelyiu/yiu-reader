@@ -24,3 +24,8 @@ gen
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+### Vue
+dist
+
+### Yiu Reader DB
+.yiu
