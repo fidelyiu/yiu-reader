@@ -34,18 +34,38 @@ func FindById(id string) (entity.Workspace, error) {
 	return result, err
 }
 
-func Save(entity *entity.Workspace) error {
-	entity.Id = uuid.New()
-	totalNum, err := dao.CountAllByTableName(bean.GetDbBean(), tableName)
+func Save(saveEntity *entity.Workspace) error {
+	saveEntity.Id = uuid.New()
+	entityStrList, err := dao.FindAllByTableName(bean.GetDbBean(), tableName)
 	if err != nil {
 		return err
 	}
-	entity.SortNum = totalNum + 1
-	buf, err := json.Marshal(entity)
+
+	pathHasInsert := false
+	hasInsertName := ""
+	// 查看路径是否已经保存过
+	for _, v := range entityStrList {
+		var entityItem entity.Workspace
+		err = json.Unmarshal([]byte(v), &entityItem)
+		if err != nil {
+			continue
+		}
+		if entityItem.Path == saveEntity.Path {
+			pathHasInsert = true
+			hasInsertName = entityItem.Name
+			break
+		}
+	}
+	if pathHasInsert {
+		return errors.New("该路径已保存为'" + hasInsertName + "'，请勿重复保存工作空间")
+	}
+
+	saveEntity.SortNum = len(entityStrList) + 1
+	buf, err := json.Marshal(saveEntity)
 	if err != nil {
 		return err
 	}
-	return dao.SaveByTableNameAndKey(bean.GetDbBean(), tableName, entity.Id, buf, entityName)
+	return dao.SaveByTableNameAndKey(bean.GetDbBean(), tableName, saveEntity.Id, buf, entityName)
 }
 
 func FindAllBySearchDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) {
@@ -62,7 +82,7 @@ func FindAllBySearchDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) 
 			// 关键字过滤
 			if YiuStr.IsNotBlank(dto.Key) &&
 				!strings.Contains(resultItem.Name, dto.Key) &&
-				!strings.Contains(resultItem.Name, dto.Key) {
+				!strings.Contains(resultItem.Path, dto.Key) {
 				appendItem = false
 			}
 			statusErr := resultItem.CheckPath()
