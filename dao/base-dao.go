@@ -49,6 +49,15 @@ func FindByTableNameAndKey(db *bbolt.DB, tableName string, key string, entityNam
 	return result, err
 }
 
+// IsEffectiveByTableNameAndKey 判断该ID是否有效
+func IsEffectiveByTableNameAndKey(db *bbolt.DB, tableName string, key string, entityName string) bool {
+	v, err := FindByTableNameAndKey(db, tableName, key, entityName)
+	if err != nil || len(v) == 0 {
+		return false
+	}
+	return true
+}
+
 // SaveByTableNameAndKey 根据表明保存一条数据，key&数据不能为空
 func SaveByTableNameAndKey(db *bbolt.DB, tableName string, key string, entityByte []byte, entityName string) error {
 	if key == "" {

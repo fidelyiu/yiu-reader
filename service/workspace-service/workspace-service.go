@@ -66,6 +66,7 @@ func View(c *gin.Context) response.YiuReaderResponse {
 	}
 	_ = viewEntity.CheckPath()
 	result.Result = viewEntity
+	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
 
@@ -91,6 +92,7 @@ func Update(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
+	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
 
@@ -103,5 +105,19 @@ func Delete(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func ChangeSort(c *gin.Context, changeType enum.ChangeSortType) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	err := WorkspaceDao.ChangeSort(id, changeType)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置"+serviceName+"序号出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

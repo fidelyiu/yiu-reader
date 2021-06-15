@@ -5,6 +5,7 @@ import (
 	"errors"
 	YiuStr "github.com/fidelyiu/yiu-go/string"
 	"github.com/go-basic/uuid"
+	"go.etcd.io/bbolt"
 	"sort"
 	"strings"
 	"yiu/yiu-reader/bean"
@@ -97,7 +98,7 @@ func SearchByDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) {
 	if err != nil {
 		return nil, err
 	}
-	if dto.SortType == enum.ASE {
+	if dto.SortType == enum.SortTypeAse {
 		sort.Slice(entityList, func(i, j int) bool {
 			return entityList[i].SortNum > entityList[j].SortNum
 		})
@@ -129,4 +130,78 @@ func Update(updateEntity *entity.Workspace) error {
 
 func DeleteById(id string) error {
 	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+}
+
+func ChangeSort(id string, changeType enum.ChangeSortType) error {
+	// 检查ID是否有效
+	if !dao.IsEffectiveByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName) {
+		return errors.New("修改" + entityName + "报错，id无效")
+	}
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+
+	// 获取所有数据
+	workspaceList := make([]entity.Workspace, 0)
+	err = table.ForEach(func(k, v []byte) error {
+		var vItem entity.Workspace
+		err := json.Unmarshal(v, &vItem)
+		if err != nil {
+			return err
+		}
+		workspaceList = append(workspaceList, vItem)
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// 排序
+	sort.Slice(workspaceList, func(i, j int) bool {
+		return workspaceList[i].SortNum > workspaceList[j].SortNum
+	})
+
+	targetIndex := -1
+	for i, v := range workspaceList {
+		if v.Id == id {
+			targetIndex = i
+		}
+		v.SortNum = i + 1
+	}
+	if targetIndex == -1 {
+		return errors.New("查找" + entityName + "报错，id无效")
+	}
+
+	if changeType == enum.ChangeSortTypeUp {
+		if targetIndex-1 >= 0 {
+			workspaceList[targetIndex].SortNum--
+			workspaceList[targetIndex-1].SortNum++
+		}
+	} else {
+		if targetIndex+1 <= len(workspaceList) {
+			workspaceList[targetIndex].SortNum++
+			workspaceList[targetIndex+1].SortNum--
+		}
+	}
+
+	// 遍历修改序号
+	for _, v := range workspaceList {
+		buf, err := json.Marshal(v)
+		if err != nil {
+			continue
+		}
+		err = table.Put([]byte(v.Id), buf)
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	return err
 }

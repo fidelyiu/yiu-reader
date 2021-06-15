@@ -3,6 +3,7 @@ package WorkspaceController
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"yiu/yiu-reader/model/enum"
 	WorkspaceService "yiu/yiu-reader/service/workspace-service"
 )
 
@@ -24,4 +25,12 @@ func Update(c *gin.Context) {
 
 func Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, WorkspaceService.Delete(c))
+}
+
+func Up(c *gin.Context) {
+	c.JSON(http.StatusOK, WorkspaceService.ChangeSort(c, enum.ChangeSortTypeUp))
+}
+
+func Down(c *gin.Context) {
+	c.JSON(http.StatusOK, WorkspaceService.ChangeSort(c, enum.ChangeSortTypeDown))
 }
