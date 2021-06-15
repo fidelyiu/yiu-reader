@@ -126,3 +126,7 @@ func Update(updateEntity *entity.Workspace) error {
 	}
 	return dao.UpdateByTableNameAndKey(bean.GetDbBean(), tableName, updateEntity.Id, buf, entityName)
 }
+
+func DeleteById(id string) error {
+	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+}

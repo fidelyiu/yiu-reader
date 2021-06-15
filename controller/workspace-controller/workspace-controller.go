@@ -21,3 +21,7 @@ func View(c *gin.Context) {
 func Update(c *gin.Context) {
 	c.JSON(http.StatusOK, WorkspaceService.Update(c))
 }
+
+func Delete(c *gin.Context) {
+	c.JSON(http.StatusOK, WorkspaceService.Delete(c))
+}

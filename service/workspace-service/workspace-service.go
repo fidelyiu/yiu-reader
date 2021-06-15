@@ -93,3 +93,15 @@ func Update(c *gin.Context) response.YiuReaderResponse {
 	}
 	return result
 }
+
+func Delete(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	err := WorkspaceDao.DeleteById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	return result
+}
