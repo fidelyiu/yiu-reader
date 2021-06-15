@@ -29,8 +29,8 @@ func main() {
 	{
 		workspaceGroup.POST("", WorkspaceController.Add)
 		workspaceGroup.GET("", WorkspaceController.Search)
-		// workspaceGroup.GET("/:id", WorkspaceController.View)
-		// workspaceGroup.PUT("", WorkspaceController.Update)
+		workspaceGroup.GET("/:id", WorkspaceController.View)
+		workspaceGroup.PUT("", WorkspaceController.Update)
 		// workspaceGroup.DELETE("/:id", WorkspaceController.Delete)
 		// workspaceGroup.GET("/content", WorkspaceController.Content)
 	}

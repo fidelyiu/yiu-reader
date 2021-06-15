@@ -13,3 +13,11 @@ func Add(c *gin.Context) {
 func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, WorkspaceService.Search(c))
 }
+
+func View(c *gin.Context) {
+	c.JSON(http.StatusOK, WorkspaceService.View(c))
+}
+
+func Update(c *gin.Context) {
+	c.JSON(http.StatusOK, WorkspaceService.Update(c))
+}

@@ -108,3 +108,21 @@ func SearchByDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) {
 	}
 	return entityList, err
 }
+
+func Update(updateEntity *entity.Workspace) error {
+	var dbEntity entity.Workspace
+	if YiuStr.IsNotBlank(updateEntity.Id) {
+		dbEntity, _ = FindById(updateEntity.Id)
+	}
+	// 不能修改序号
+	if YiuStr.IsBlank(dbEntity.Id) {
+		return errors.New("修改" + entityName + "报错，id不能为空")
+	} else {
+		updateEntity.SortNum = dbEntity.SortNum
+	}
+	buf, err := json.Marshal(updateEntity)
+	if err != nil {
+		return err
+	}
+	return dao.UpdateByTableNameAndKey(bean.GetDbBean(), tableName, updateEntity.Id, buf, entityName)
+}
