@@ -20,5 +20,14 @@ func main() {
 	// index.html
 	router.LoadHTMLFiles("dist/index.html")
 	router.GET("/", MainController.IndexHTML)
+
+	apiGroup := router.Group("/api")
+	{
+		mainGroup := apiGroup.Group("/main")
+		{
+			mainGroup.GET("/current/workspace", MainController.GetCurrentWorkspace)
+		}
+	}
+
 	_ = router.Run(":8081")
 }
