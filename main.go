@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	MainController "yiu/yiu-reader/controller/main-controller"
+	WorkspaceController "yiu/yiu-reader/controller/workspace-controller"
 	OpUtil "yiu/yiu-reader/util/op-util"
 )
 
@@ -21,12 +22,17 @@ func main() {
 	router.LoadHTMLFiles("dist/index.html")
 	router.GET("/", MainController.IndexHTML)
 
-	apiGroup := router.Group("/api")
+	router.GET("/current/workspace", MainController.GetCurrentWorkspace)
+	router.PUT("/current/workspace", MainController.SetCurrentWorkspace)
+
+	workspaceGroup := router.Group("/workspace")
 	{
-		mainGroup := apiGroup.Group("/main")
-		{
-			mainGroup.GET("/current/workspace", MainController.GetCurrentWorkspace)
-		}
+		workspaceGroup.POST("", WorkspaceController.Add)
+		workspaceGroup.GET("", WorkspaceController.Search)
+		// workspaceGroup.GET("/:id", WorkspaceController.View)
+		// workspaceGroup.PUT("", WorkspaceController.Update)
+		// workspaceGroup.DELETE("/:id", WorkspaceController.Delete)
+		// workspaceGroup.GET("/content", WorkspaceController.Content)
 	}
 
 	_ = router.Run(":8081")

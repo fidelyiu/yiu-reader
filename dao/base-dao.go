@@ -21,6 +21,20 @@ func FindAllByTableName(db *bbolt.DB, tableName string) ([]string, error) {
 	return result, err
 }
 
+// CountAllByTableName 根据表明统计所有数据
+func CountAllByTableName(db *bbolt.DB, tableName string) (int, error) {
+	var result int
+	err := db.View(func(tx *bbolt.Tx) error {
+		table := GetTableByName(tx, tableName)
+		err := table.ForEach(func(_, _ []byte) error {
+			result++
+			return nil
+		})
+		return err
+	})
+	return result, err
+}
+
 // FindByTableNameAndKey 根据表名&Key查找一个数据
 func FindByTableNameAndKey(db *bbolt.DB, tableName string, key string, entityName string) (string, error) {
 	if key == "" {

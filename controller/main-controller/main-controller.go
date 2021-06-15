@@ -14,3 +14,7 @@ func IndexHTML(c *gin.Context) {
 func GetCurrentWorkspace(c *gin.Context) {
 	c.JSON(http.StatusOK, MainService.GetCurrentWorkspace())
 }
+
+func SetCurrentWorkspace(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.SetCurrentWorkspace(c))
+}
