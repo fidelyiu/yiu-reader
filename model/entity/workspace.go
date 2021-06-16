@@ -19,7 +19,7 @@ type Workspace struct {
 func (w *Workspace) CheckPath() error {
 	if !PathUtil.IsValidDir(w.Path) {
 		w.Status = enum.ObjStatusInvalid
-		return errors.New("工作空间[Path]不是有效绝对路径")
+		return errors.New("工作空间 '" + w.Path + "' 不是有效绝对路径")
 	}
 	w.Status = enum.ObjStatusValid
 	return nil
@@ -27,7 +27,7 @@ func (w *Workspace) CheckPath() error {
 
 func (w *Workspace) CheckName() error {
 	if YiuStr.IsBlank(w.Name) {
-		return errors.New("工作空间[Name]不能为空")
+		return errors.New("工作空间名称不能为空")
 	}
 	return nil
 }
