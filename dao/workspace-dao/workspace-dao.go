@@ -120,11 +120,11 @@ func SearchByDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) {
 	}
 	if dto.SortType == enum.SortTypeAse {
 		sort.Slice(entityList, func(i, j int) bool {
-			return entityList[i].SortNum > entityList[j].SortNum
+			return entityList[i].SortNum < entityList[j].SortNum
 		})
 	} else {
 		sort.Slice(entityList, func(i, j int) bool {
-			return entityList[i].SortNum < entityList[j].SortNum
+			return entityList[i].SortNum > entityList[j].SortNum
 		})
 	}
 	return entityList, err
@@ -186,7 +186,7 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 
 	// 排序
 	sort.Slice(workspaceList, func(i, j int) bool {
-		return workspaceList[i].SortNum > workspaceList[j].SortNum
+		return workspaceList[i].SortNum < workspaceList[j].SortNum
 	})
 
 	targetIndex := -1
@@ -194,19 +194,19 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 		if v.Id == id {
 			targetIndex = i
 		}
-		v.SortNum = i + 1
+		workspaceList[i].SortNum = i + 1
 	}
 	if targetIndex == -1 {
 		return errors.New("查找" + entityName + "报错，id无效")
 	}
 
 	if changeType == enum.ChangeSortTypeUp {
-		if targetIndex-1 >= 0 {
+		if targetIndex-1 > 0 {
 			workspaceList[targetIndex].SortNum--
 			workspaceList[targetIndex-1].SortNum++
 		}
 	} else {
-		if targetIndex+1 <= len(workspaceList) {
+		if targetIndex+1 < len(workspaceList) {
 			workspaceList[targetIndex].SortNum++
 			workspaceList[targetIndex+1].SortNum--
 		}
