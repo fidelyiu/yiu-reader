@@ -201,7 +201,7 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 	}
 
 	if changeType == enum.ChangeSortTypeUp {
-		if targetIndex-1 > 0 {
+		if targetIndex-1 >= 0 {
 			workspaceList[targetIndex].SortNum--
 			workspaceList[targetIndex-1].SortNum++
 		}
