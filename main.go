@@ -23,7 +23,7 @@ func main() {
 	router.GET("/", MainController.IndexHTML)
 
 	router.GET("/current/workspace", MainController.GetCurrentWorkspace)
-	router.PUT("/current/workspace", MainController.SetCurrentWorkspace)
+	router.PUT("/current/workspace/:id", MainController.SetCurrentWorkspace)
 
 	workspaceGroup := router.Group("/workspace")
 	{
