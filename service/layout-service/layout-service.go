@@ -1,6 +1,8 @@
 package LayoutService
 
 import (
+	"fmt"
+	YiuStr "github.com/fidelyiu/yiu-go/string"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"yiu/yiu-reader/bean"
@@ -29,6 +31,7 @@ func Add(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	var addEntity entity.Layout
 	err := c.ShouldBindJSON(&addEntity)
+	maxX := YiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
 	if err != nil {
 		bean.GetLoggerBean().Error("添加"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
 		result.ToError(err.Error())
@@ -50,9 +53,10 @@ func Add(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	LayoutUtil.GetDefaultLayout(currentList, &addEntity)
+	LayoutUtil.GetDefaultLayout(currentList, &addEntity, maxX)
 
 	err = LayoutDao.Save(&addEntity)
+	fmt.Printf("%+v\n", addEntity)
 	if err != nil {
 		bean.GetLoggerBean().Error("添加"+serviceName+"出错，数据库层错误!", zap.Error(err))
 		result.ToError(err.Error())

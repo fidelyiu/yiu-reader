@@ -8,16 +8,15 @@ import (
 )
 
 type Layout struct {
-	Id         string                 // Uuid
-	Type       enum.LayoutType        // 类型
-	Status     enum.ObjStatus         // 状态
-	Content    string                 // 内容，根据类型而定
-	Width      int                    // 宽度
-	Height     int                    // 高度
-	Left       int                    // 距离左边
-	Top        int                    // 距离顶部
-	Setting    map[string]interface{} // 设置，根据类型而定
-	UpdateTime time.Time              // 最后更新时间
+	Id         string                 `json:"id"`         // Uuid
+	Type       enum.LayoutType        `json:"type"`       // 类型
+	Status     enum.ObjStatus         `json:"status"`     // 状态
+	Width      int                    `json:"width"`      // 宽度
+	Height     int                    `json:"height"`     // 高度
+	Left       int                    `json:"left"`       // 距离左边
+	Top        int                    `json:"top"`        // 距离顶部
+	Setting    map[string]interface{} `json:"setting"`    // 设置，根据类型而定
+	UpdateTime time.Time              `json:"updateTime"` // 最后更新时间
 }
 
 func (l *Layout) CheckType() error {

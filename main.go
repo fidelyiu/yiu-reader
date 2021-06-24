@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	LayoutController "yiu/yiu-reader/controller/layout-controller"
 	MainController "yiu/yiu-reader/controller/main-controller"
 	WorkspaceController "yiu/yiu-reader/controller/workspace-controller"
 	OpUtil "yiu/yiu-reader/util/op-util"
@@ -35,6 +36,11 @@ func main() {
 		workspaceGroup.PUT("/up/:id", WorkspaceController.Up)
 		workspaceGroup.PUT("/down/:id", WorkspaceController.Down)
 		// workspaceGroup.GET("/content", WorkspaceController.Content)
+	}
+
+	layoutGroup := router.Group("/layout")
+	{
+		layoutGroup.POST("", LayoutController.Add)
 	}
 
 	_ = router.Run(":8081")

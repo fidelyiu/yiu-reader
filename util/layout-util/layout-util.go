@@ -16,6 +16,10 @@ type point struct {
 // (x-w, y  )|(x, y  )  |  (x, y  )|(x+w, y  )
 // (x-w, y+h)|(x, y+h)  |  (x, y+h)|(x+w, y+h)
 
+func (p *point) isEqual(target point) bool {
+	return p.x == target.x && p.y == target.y
+}
+
 func (p *point) outBoxLeftTop(width int, height int) box {
 	return box{
 		pointA: point{p.x - width, p.y - height},
@@ -58,12 +62,20 @@ type box struct {
 	pointD point
 }
 
+func (b *box) isEqual(target box) bool {
+	return b.pointA.isEqual(target.pointA) &&
+		b.pointB.isEqual(target.pointB) &&
+		b.pointC.isEqual(target.pointC) &&
+		b.pointD.isEqual(target.pointD)
+}
+
 // 两个盒子是否相交
 func (b *box) hasIntersect(target box) bool {
 	return b.pointInBox(target.pointA) ||
 		b.pointInBox(target.pointB) ||
 		b.pointInBox(target.pointC) ||
-		b.pointInBox(target.pointD)
+		b.pointInBox(target.pointD) ||
+		b.isEqual(target)
 }
 
 // pointInBox 点是否在盒子中
@@ -101,47 +113,49 @@ func (b *box) getHeight() int {
 
 func (b *box) toLayout() entity.Layout {
 	return entity.Layout{
-		Width:  b.getMaxX() - b.getMinX() - 16,
-		Height: b.getMaxY() - b.getMinY() - 16,
-		Left:   b.getMinX() + 8,
-		Top:    b.getMinY() + 8,
+		Width:  b.getMaxX() - b.getMinX(),
+		Height: b.getMaxY() - b.getMinY(),
+		Left:   b.getMinX(),
+		Top:    b.getMinY(),
 	}
 }
 
+// getBorderBoxListByWithAndHeight 获取盒子周边的12个盒子
 func (b *box) getBorderBoxListByWithAndHeight(width int, height int) [12]box {
 	// 输出的盒子顺序
-	// 1 | 4 5 | 7
-	// --A-----B---
-	// 2 |     | 10
-	// 3 |     | 11
-	// --C-----D---
-	// 6 | 8 9 | 12
+	// 1 | 2  3  | 4
+	// --A-------B---
+	// 7 |       | 5
+	// 8 |       | 6
+	// --C-------D---
+	// 9 | 10 11 | 12
 
 	return [12]box{
 		b.pointA.outBoxLeftTop(width, height),     // 1
-		b.pointA.outBoxLeftBottom(width, height),  // 2
-		b.pointC.outBoxLeftTop(width, height),     // 3
-		b.pointA.outBoxRightTop(width, height),    // 4
-		b.pointB.outBoxLeftTop(width, height),     // 5
-		b.pointC.outBoxLeftBottom(width, height),  // 6
-		b.pointB.outBoxRightTop(width, height),    // 7
-		b.pointC.outBoxRightBottom(width, height), // 8
-		b.pointD.outBoxLeftBottom(width, height),  // 9
-		b.pointB.outBoxRightBottom(width, height), // 10
-		b.pointD.outBoxRightTop(width, height),    // 11
+		b.pointA.outBoxRightTop(width, height),    // 2
+		b.pointB.outBoxLeftTop(width, height),     // 3
+		b.pointB.outBoxRightTop(width, height),    // 4
+		b.pointB.outBoxRightBottom(width, height), // 5
+		b.pointD.outBoxRightTop(width, height),    // 6
+		b.pointA.outBoxLeftBottom(width, height),  // 7
+		b.pointC.outBoxLeftTop(width, height),     // 8
+		b.pointC.outBoxLeftBottom(width, height),  // 9
+		b.pointC.outBoxRightBottom(width, height), // 10
+		b.pointD.outBoxLeftBottom(width, height),  // 11
 		b.pointD.outBoxRightBottom(width, height), // 12
 	}
 }
 
 func layoutToBox(layout entity.Layout) box {
 	return box{
-		pointA: point{layout.Left - 8, layout.Top - 8},
-		pointB: point{layout.Left + layout.Width + 8, layout.Top - 8},
-		pointC: point{layout.Left - 8, layout.Top + layout.Height + 8},
-		pointD: point{layout.Left + layout.Width + 8, layout.Top + layout.Height + 8},
+		pointA: point{layout.Left, layout.Top},
+		pointB: point{layout.Left + layout.Width, layout.Top},
+		pointC: point{layout.Left, layout.Top + layout.Height},
+		pointD: point{layout.Left + layout.Width, layout.Top + layout.Height},
 	}
 }
 
+// 面板
 type layoutStaff struct {
 	boxList []box
 	minX    int
@@ -156,6 +170,8 @@ func (l *layoutStaff) pointInStaff(x int, y int) bool {
 		l.minY < y && y < l.maxY
 }
 
+// boxCanPush 判断盒子是否可以插入面板中
+// 如果盒子和任意一个已插入盒子相交了，那么就不能插入
 func (l *layoutStaff) boxCanPush(b box) bool {
 	for _, v := range l.boxList {
 		if v.hasIntersect(b) {
@@ -165,18 +181,26 @@ func (l *layoutStaff) boxCanPush(b box) bool {
 	return true
 }
 
+// push 将一个盒子插入面板中，返回是否插入成功
 func (l *layoutStaff) push(b box) bool {
 	if l.boxCanPush(b) {
+		// 如果能插入，就直接插入
 		l.boxList = append(l.boxList, b)
-		l.chengMaxValue(b)
+		l.changeMaxValue(b)
 		return true
 	}
 	return false
 }
 
+// boxIsValid 判断该盒子是否在该面板的有效范围内
+// 大于最小值x、y
 func (l *layoutStaff) boxIsValid(b box) bool {
-	if b.getMinX() < l.minX || b.getMinY() < l.minY &&
-		b.getMaxX() <= l.maxX {
+	if l.maxX == 0 {
+		l.maxX = 1080
+	}
+	if b.getMinX() < l.minX ||
+		b.getMinY() < l.minY ||
+		b.getMaxX() > l.maxX {
 		return false
 	}
 	for _, v := range l.boxList {
@@ -187,46 +211,50 @@ func (l *layoutStaff) boxIsValid(b box) bool {
 	return true
 }
 
-func (l *layoutStaff) chengMaxValue(b box) {
-	if l.maxX > b.getMaxX() {
+func (l *layoutStaff) changeMaxValue(b box) {
+	if l.maxX < b.getMaxX() {
 		l.maxX = b.getMaxX()
 	}
-	if l.maxY > b.getMaxY() {
+	if l.maxY < b.getMaxY() {
 		l.maxY = b.getMaxY()
 	}
 }
 
+// pushWithChange 将一个盒子插入，
 func (l *layoutStaff) pushWithChange(b box) box {
 	for _, v := range l.boxList {
 		testBoxList := v.getBorderBoxListByWithAndHeight(b.getWidth(), b.getHeight())
 		for _, t := range testBoxList {
 			if l.boxIsValid(t) {
-				l.chengMaxValue(t)
+				l.changeMaxValue(t)
 				return t
 			}
 		}
 	}
 	// 都不符合，找l.MaxY，排第一个
 	result := box{
-		pointA: point{-8, l.maxY},
-		pointB: point{-8 + b.getWidth(), l.maxY},
-		pointC: point{-8, l.maxY + b.getHeight()},
-		pointD: point{-8 + b.getWidth(), l.maxY + b.getHeight()},
+		pointA: point{0, l.maxY},
+		pointB: point{b.getWidth(), l.maxY},
+		pointC: point{0, l.maxY + b.getHeight()},
+		pointD: point{b.getWidth(), l.maxY + b.getHeight()},
 	}
 	l.maxY = l.maxY + b.getHeight()
-	l.chengMaxValue(result)
+	l.changeMaxValue(result)
 	return result
 }
 
-func newLayoutStaff() layoutStaff {
+// newLayoutStaff 生成一个最小值xy为-8的面板
+func newLayoutStaff(maxX int) layoutStaff {
 	return layoutStaff{
-		minX: -8,
-		minY: -8,
+		minX: 0,
+		minY: 0,
+		maxX: maxX,
 	}
 }
 
-func FormatLayout(layoutList *[]entity.Layout) {
-	staff := newLayoutStaff()
+// FormatLayout 格式化所有传入的布局
+func FormatLayout(layoutList *[]entity.Layout, maxX int) {
+	staff := newLayoutStaff(maxX)
 	var notPushLayout []*entity.Layout
 	for _, v := range *layoutList {
 		if !staff.push(layoutToBox(v)) {
@@ -241,13 +269,18 @@ func FormatLayout(layoutList *[]entity.Layout) {
 	}
 }
 
-func GetDefaultLayout(layoutList []entity.Layout, layout *entity.Layout) {
-	staff := newLayoutStaff()
+func GetDefaultLayout(layoutList []entity.Layout, layout *entity.Layout, maxX int) {
+	// 生成一个默认面板
+	staff := newLayoutStaff(maxX)
+	// 将所有已有的盒子插入
 	for _, v := range layoutList {
 		staff.push(layoutToBox(v))
 	}
+	// 将待插入盒子尝试插入面板，插入后生成临时调整盒子
 	changeBox := staff.pushWithChange(layoutToBox(*layout))
+	// 将盒子转换成布局
 	changLayout := changeBox.toLayout()
-	(*layout).Left = changLayout.Left
-	(*layout).Height = changLayout.Height
+	// 修改待加入布局
+	layout.Left = changLayout.Left
+	layout.Top = changLayout.Top
 }
