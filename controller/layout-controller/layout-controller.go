@@ -9,3 +9,7 @@ import (
 func Add(c *gin.Context) {
 	c.JSON(http.StatusOK, LayoutService.Add(c))
 }
+
+func Search(c *gin.Context) {
+	c.JSON(http.StatusOK, LayoutService.GetAllBySort())
+}

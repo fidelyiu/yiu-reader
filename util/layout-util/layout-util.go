@@ -1,6 +1,7 @@
 package LayoutUtil
 
 import (
+	YiuInt "github.com/fidelyiu/yiu-go/int"
 	"yiu/yiu-reader/model/entity"
 )
 
@@ -71,11 +72,8 @@ func (b *box) isEqual(target box) bool {
 
 // 两个盒子是否相交
 func (b *box) hasIntersect(target box) bool {
-	return b.pointInBox(target.pointA) ||
-		b.pointInBox(target.pointB) ||
-		b.pointInBox(target.pointC) ||
-		b.pointInBox(target.pointD) ||
-		b.isEqual(target)
+	return YiuInt.IsIntersect(b.getMinX(), b.getMaxX(), target.getMinX(), target.getMaxX(), false) &&
+		YiuInt.IsIntersect(b.getMinY(), b.getMaxY(), target.getMinY(), target.getMaxY(), false)
 }
 
 // pointInBox 点是否在盒子中
@@ -222,12 +220,39 @@ func (l *layoutStaff) changeMaxValue(b box) {
 
 // pushWithChange 将一个盒子插入，
 func (l *layoutStaff) pushWithChange(b box) box {
+	// 先判断上面四个盒子
 	for _, v := range l.boxList {
 		testBoxList := v.getBorderBoxListByWithAndHeight(b.getWidth(), b.getHeight())
-		for _, t := range testBoxList {
-			if l.boxIsValid(t) {
-				l.changeMaxValue(t)
-				return t
+		for i, t := range testBoxList {
+			if 1 <= i+1 && i+1 <= 4 {
+				if l.boxIsValid(t) {
+					l.changeMaxValue(t)
+					return t
+				}
+			}
+		}
+	}
+	// 再判断之间四个盒子
+	for _, v := range l.boxList {
+		testBoxList := v.getBorderBoxListByWithAndHeight(b.getWidth(), b.getHeight())
+		for i, t := range testBoxList {
+			if 5 <= i+1 && i+1 <= 8 {
+				if l.boxIsValid(t) {
+					l.changeMaxValue(t)
+					return t
+				}
+			}
+		}
+	}
+	// 最后判断底下四个盒子
+	for _, v := range l.boxList {
+		testBoxList := v.getBorderBoxListByWithAndHeight(b.getWidth(), b.getHeight())
+		for i, t := range testBoxList {
+			if 9 <= i+1 && i+1 <= 12 {
+				if l.boxIsValid(t) {
+					l.changeMaxValue(t)
+					return t
+				}
 			}
 		}
 	}

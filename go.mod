@@ -3,7 +3,7 @@ module yiu/yiu-reader
 go 1.16
 
 require (
-	github.com/fidelyiu/yiu-go v1.0.20
+	github.com/fidelyiu/yiu-go v1.0.21
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-basic/uuid v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.6

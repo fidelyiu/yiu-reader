@@ -3,6 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fidelyiu/yiu-go v1.0.20 h1:O1RTAWQZhEjLYnESODpFsDcPNqomYlreH4H7LCudL/o=
 github.com/fidelyiu/yiu-go v1.0.20/go.mod h1:SphIDJ5SQCziDEu8i+F6DX+pt55K8zTfUPb6YYV5CEg=
+github.com/fidelyiu/yiu-go v1.0.21 h1:chxIj5OspkPEzyA1yf44VriHcAH1cRNEz9tHbCiYrBk=
+github.com/fidelyiu/yiu-go v1.0.21/go.mod h1:SphIDJ5SQCziDEu8i+F6DX+pt55K8zTfUPb6YYV5CEg=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.7.2 h1:Tg03T9yM2xa8j6I3Z3oqLaQRSmKvxPd6g/2HJ6zICFA=

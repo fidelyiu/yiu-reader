@@ -40,6 +40,7 @@ func main() {
 
 	layoutGroup := router.Group("/layout")
 	{
+		layoutGroup.GET("", LayoutController.Search)
 		layoutGroup.POST("", LayoutController.Add)
 	}
 
