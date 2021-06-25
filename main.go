@@ -42,6 +42,7 @@ func main() {
 	{
 		layoutGroup.GET("", LayoutController.Search)
 		layoutGroup.POST("", LayoutController.Add)
+		layoutGroup.DELETE("/:id", LayoutController.Delete)
 	}
 
 	_ = router.Run(":8081")

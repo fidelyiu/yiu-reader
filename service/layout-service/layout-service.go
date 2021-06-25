@@ -1,7 +1,6 @@
 package LayoutService
 
 import (
-	"fmt"
 	YiuStr "github.com/fidelyiu/yiu-go/string"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -56,9 +55,21 @@ func Add(c *gin.Context) response.YiuReaderResponse {
 	LayoutUtil.GetDefaultLayout(currentList, &addEntity, maxX)
 
 	err = LayoutDao.Save(&addEntity)
-	fmt.Printf("%+v\n", addEntity)
 	if err != nil {
 		bean.GetLoggerBean().Error("添加"+serviceName+"出错，数据库层错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func Delete(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	err := LayoutDao.DeleteById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
 		result.ToError(err.Error())
 		return result
 	}

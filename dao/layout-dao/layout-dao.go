@@ -52,3 +52,7 @@ func FindAllSortByUpdateTime() ([]entity.Layout, error) {
 	})
 	return entityList, err
 }
+
+func DeleteById(id string) error {
+	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+}

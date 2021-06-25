@@ -13,3 +13,7 @@ func Add(c *gin.Context) {
 func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, LayoutService.GetAllBySort())
 }
+
+func Delete(c *gin.Context) {
+	c.JSON(http.StatusOK, LayoutService.Delete(c))
+}
