@@ -277,21 +277,22 @@ func newLayoutStaff(maxX int) layoutStaff {
 	}
 }
 
-// FormatLayout 格式化所有传入的布局
-func FormatLayout(layoutList *[]entity.Layout, maxX int) {
+// OutInvalidLayout 检查所有无效布局，并输出这些无效布局转换后的有效布局
+func OutInvalidLayout(layoutList []entity.Layout, maxX int) []entity.Layout {
 	staff := newLayoutStaff(maxX)
-	var notPushLayout []*entity.Layout
-	for _, v := range *layoutList {
+	var notPushLayout []entity.Layout
+	for _, v := range layoutList {
 		if !staff.push(layoutToBox(v)) {
-			notPushLayout = append(notPushLayout, &v)
+			notPushLayout = append(notPushLayout, v)
 		}
 	}
-	for _, v := range notPushLayout {
-		changeBox := staff.pushWithChange(layoutToBox(*v))
+	for i, v := range notPushLayout {
+		changeBox := staff.pushWithChange(layoutToBox(v))
 		changLayout := changeBox.toLayout()
-		(*v).Left = changLayout.Left
-		(*v).Height = changLayout.Height
+		notPushLayout[i].Left = changLayout.Left
+		notPushLayout[i].Top = changLayout.Top
 	}
+	return notPushLayout
 }
 
 func GetDefaultLayout(layoutList []entity.Layout, layout *entity.Layout, maxX int) {

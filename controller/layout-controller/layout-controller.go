@@ -17,3 +17,7 @@ func Search(c *gin.Context) {
 func Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, LayoutService.Delete(c))
 }
+
+func ResizePosition(c *gin.Context) {
+	c.JSON(http.StatusOK, LayoutService.ResizePosition(c))
+}

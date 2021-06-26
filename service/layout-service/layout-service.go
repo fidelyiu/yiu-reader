@@ -76,3 +76,53 @@ func Delete(c *gin.Context) response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func ResizePosition(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	maxX := YiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
+	var resizeEntity entity.Layout
+	err := c.ShouldBindJSON(&resizeEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("添加"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	if resizeEntity.Id == "" {
+		result.ToError("布局id不能为空")
+		return result
+	}
+	if resizeEntity.CheckWidth() != nil || resizeEntity.CheckHeight() != nil {
+		result.ToError("布局宽高无效")
+		return result
+	}
+	// 从数据库中查找数据出来
+	dbEntity, err := LayoutDao.FindById(resizeEntity.Id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	dbEntity.Left = resizeEntity.Left
+	dbEntity.Top = resizeEntity.Top
+	dbEntity.Width = resizeEntity.Width
+	dbEntity.Height = resizeEntity.Height
+
+	// 修改数据
+	err = LayoutDao.Update(&dbEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("修改"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	// 重置所有布局
+	err = LayoutDao.FormatAll(maxX)
+	if err != nil {
+		bean.GetLoggerBean().Error("格式化"+serviceName+"位置出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

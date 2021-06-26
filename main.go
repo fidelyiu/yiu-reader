@@ -42,6 +42,7 @@ func main() {
 	{
 		layoutGroup.GET("", LayoutController.Search)
 		layoutGroup.POST("", LayoutController.Add)
+		layoutGroup.PUT("/resize", LayoutController.ResizePosition)
 		layoutGroup.DELETE("/:id", LayoutController.Delete)
 	}
 
