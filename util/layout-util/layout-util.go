@@ -288,6 +288,7 @@ func OutInvalidLayout(layoutList []entity.Layout, maxX int) []entity.Layout {
 	}
 	for i, v := range notPushLayout {
 		changeBox := staff.pushWithChange(layoutToBox(v))
+		staff.push(changeBox)
 		changLayout := changeBox.toLayout()
 		notPushLayout[i].Left = changLayout.Left
 		notPushLayout[i].Top = changLayout.Top
