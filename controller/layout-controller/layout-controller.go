@@ -21,3 +21,11 @@ func Delete(c *gin.Context) {
 func ResizePosition(c *gin.Context) {
 	c.JSON(http.StatusOK, LayoutService.ResizePosition(c))
 }
+
+func Update(c *gin.Context) {
+	c.JSON(http.StatusOK, LayoutService.Update(c))
+}
+
+func View(c *gin.Context) {
+	c.JSON(http.StatusOK, LayoutService.View(c))
+}

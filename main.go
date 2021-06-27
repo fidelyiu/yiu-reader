@@ -44,6 +44,8 @@ func main() {
 		layoutGroup.POST("", LayoutController.Add)
 		layoutGroup.PUT("/resize", LayoutController.ResizePosition)
 		layoutGroup.DELETE("/:id", LayoutController.Delete)
+		layoutGroup.PUT("", LayoutController.Update)
+		layoutGroup.GET("/:id", LayoutController.View)
 	}
 
 	_ = router.Run(":8081")

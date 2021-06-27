@@ -47,6 +47,19 @@ func (l *Layout) CheckHeight() error {
 	return nil
 }
 
+func (l *Layout) CheckSetting() error {
+	switch l.Type {
+	case enum.LayoutTypeLink:
+		if l.Setting["name"] == nil {
+			return errors.New("链接名称不能为空")
+		}
+		if l.Setting["url"] == nil {
+			return errors.New("链接地址不能为空")
+		}
+	}
+	return nil
+}
+
 func (l *Layout) Check() error {
 	return YiuErrorList.ToError([]error{
 		l.CheckType(),

@@ -126,3 +126,54 @@ func ResizePosition(c *gin.Context) response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func Update(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	var updateEntity entity.Layout
+	err := c.ShouldBindJSON(&updateEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("修改"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	if updateEntity.Id == "" {
+		result.ToError("布局id不能为空")
+		return result
+	}
+
+	// 从数据库中查找数据出来
+	dbEntity, err := LayoutDao.FindById(updateEntity.Id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	dbEntity.Setting = updateEntity.Setting
+
+	// 检查
+	err = dbEntity.Check()
+	err = LayoutDao.Update(&dbEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("修改"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func View(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	viewEntity, err := LayoutDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = viewEntity
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
