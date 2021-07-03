@@ -35,6 +35,7 @@ func main() {
 		workspaceGroup.DELETE("/:id", WorkspaceController.Delete)
 		workspaceGroup.PUT("/up/:id", WorkspaceController.Up)
 		workspaceGroup.PUT("/down/:id", WorkspaceController.Down)
+		workspaceGroup.GET("/refresh", WorkspaceController.Refresh)
 		// workspaceGroup.GET("/content", WorkspaceController.Content)
 	}
 

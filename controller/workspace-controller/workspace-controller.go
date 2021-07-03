@@ -34,3 +34,7 @@ func Up(c *gin.Context) {
 func Down(c *gin.Context) {
 	c.JSON(http.StatusOK, WorkspaceService.ChangeSort(c, enum.ChangeSortTypeDown))
 }
+
+func Refresh(c *gin.Context) {
+	WorkspaceService.Refresh(c)
+}

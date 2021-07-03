@@ -9,7 +9,7 @@ const (
 
 	WorkspaceTable = "workspace" // 工作空间表
 
-	DirectoryTable = "directory" // 目录表
+	NoteTable = "note" // 笔记表
 
 	MarkdownTable = "markdown" // Markdown文件表
 
