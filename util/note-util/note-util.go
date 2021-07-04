@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"yiu/yiu-reader/bean"
@@ -160,4 +161,59 @@ func noteListIsInclude(noteList []entity.Note, it entity.Note) enum.NoteReadResu
 		}
 	}
 	return enum.NoteReadResultNotImport
+}
+
+func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
+	var result []vo.NoteTreeVo
+	if len(noteList) == 0 {
+		return result
+	}
+	// 先找出最高的等级
+	level := noteList[0].Level
+	for i := range noteList {
+		if level > noteList[i].Level {
+			level = noteList[i].Level
+		}
+	}
+
+	for i := range noteList {
+		if level == noteList[i].Level {
+			result = append(result, vo.NoteTreeVo{
+				Data: noteList[i],
+			})
+		}
+	}
+
+	for i := range result {
+		if result[i].Data.IsDir {
+			result[i].Child = getChild(result[i].Data, noteList)
+		}
+	}
+	if len(result) != 0 {
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].Data.SortNum < result[j].Data.SortNum
+		})
+	}
+	return result
+}
+
+func getChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
+	var result []vo.NoteTreeVo
+	if len(noteList) == 0 {
+		return result
+	}
+	for i := range noteList {
+		if noteList[i].ParentId == parent.Id {
+			result = append(result, vo.NoteTreeVo{
+				Data:  noteList[i],
+				Child: getChild(noteList[i], append(noteList[:i], noteList[i+1:]...)),
+			})
+		}
+	}
+	if len(result) != 0 {
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].Data.SortNum < result[j].Data.SortNum
+		})
+	}
+	return result
 }

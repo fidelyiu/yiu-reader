@@ -13,3 +13,11 @@ func Refresh(c *gin.Context) {
 func SearchTree(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.SearchTree(c))
 }
+
+func Search(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Search(c))
+}
+
+func Delete(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Delete(c))
+}

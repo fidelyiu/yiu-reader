@@ -10,8 +10,17 @@ import (
 // IsValidDir 是否是有效的实体目录路径
 // 1. 需要是绝对路径
 // 2. 路径本身有效
+// 3. 文件夹
 func IsValidDir(str string) bool {
 	return filepath.IsAbs(str) && YiuDir.IsExists(str)
+}
+
+// IsValidFile 是否是有效的实体文件路径
+// 1. 需要是绝对路径
+// 2. 路径本身有效
+// 3. 文件
+func IsValidFile(str string) bool {
+	return filepath.IsAbs(str) && YiuFile.IsExists(str)
 }
 
 // IsValidMarkdown 是否是有效的实体Markdown文件路径

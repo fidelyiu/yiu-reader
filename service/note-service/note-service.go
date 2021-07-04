@@ -14,11 +14,15 @@ import (
 	MainDao "yiu/yiu-reader/dao/main-dao"
 	NoteDao "yiu/yiu-reader/dao/note-dao"
 	WorkspaceDao "yiu/yiu-reader/dao/workspace-dao"
+	"yiu/yiu-reader/model/dto"
 	"yiu/yiu-reader/model/entity"
+	"yiu/yiu-reader/model/enum"
 	"yiu/yiu-reader/model/response"
 	"yiu/yiu-reader/model/vo"
 	NoteUtil "yiu/yiu-reader/util/note-util"
 )
+
+const serviceName = "笔记"
 
 var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -35,8 +39,6 @@ func Refresh(c *gin.Context) {
 	defer func(ws *websocket.Conn) {
 		_ = ws.Close()
 	}(ws)
-
-	// _ = ws.WriteMessage(websocket.TextMessage, []byte("pong"))
 
 	// 获取当前工作空间ID
 	currentWorkspaceId, err := MainDao.GetCurrentWorkspaceId()
@@ -162,7 +164,77 @@ func Refresh(c *gin.Context) {
 	}
 }
 
-func SearchTree(c *gin.Context) response.YiuReaderResponse {
+func Delete(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	err := NoteDao.DeleteById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func Search(c *gin.Context) response.YiuReaderResponse {
+	var searchDto dto.NoteSearchDto
+	_ = c.ShouldBindQuery(&searchDto)
+	result := response.YiuReaderResponse{}
+	allNote, err := NoteDao.FindBySearchDto(searchDto)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据工作空间ID获取所有笔记失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = allNote
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SearchTree(c *gin.Context) response.YiuReaderResponse {
+	var searchDto dto.NoteSearchDto
+	_ = c.ShouldBindQuery(&searchDto)
+
+	result := response.YiuReaderResponse{}
+
+	// 获取当前工作空间ID
+	currentWorkspaceId, err := MainDao.GetCurrentWorkspaceId()
+	if err != nil {
+		bean.GetLoggerBean().Error("当前工作空间ID获取失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	// 获取当前工作空间
+	currentWorkspace, err := WorkspaceDao.FindById(currentWorkspaceId)
+	if err != nil {
+		bean.GetLoggerBean().Error("当前工作空间获取失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	if searchDto.Path != "" {
+		// 找对应文件夹的笔记
+		searchDto.Path = currentWorkspace.Path + string(os.PathSeparator) + searchDto.Path
+		YiuStr.OpFormatPathSeparator(&searchDto.Path)
+		dbNote, err := NoteDao.FindByAbsPath(searchDto.Path)
+		if err != nil {
+			bean.GetLoggerBean().Error("获取当前笔记ID失败!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+		searchDto.ParentId = dbNote.Id
+	} else {
+		// 当前工作空间所有笔记
+		searchDto.WorkspaceId = currentWorkspaceId
+	}
+	allNote, err := NoteDao.FindBySearchDto(searchDto)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据工作空间ID获取所有笔记失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = NoteUtil.GetTree(allNote)
+	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

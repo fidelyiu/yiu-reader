@@ -53,6 +53,8 @@ func main() {
 	{
 		noteGroup.GET("/refresh", NoteController.Refresh)
 		noteGroup.POST("/tree", NoteController.SearchTree)
+		noteGroup.GET("", NoteController.Search)
+		noteGroup.DELETE("/:id", NoteController.Delete)
 	}
 
 	_ = router.Run(":8081")
