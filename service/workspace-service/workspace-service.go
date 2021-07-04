@@ -171,6 +171,7 @@ func Refresh(c *gin.Context) {
 	YiuStr.OpFormatPathSeparator(&tempPath)
 	if path != "" {
 		tempPath += string(os.PathSeparator) + path
+		YiuStr.OpFormatPathSeparator(&tempPath)
 		dbNote, err := NoteDao.FindByAbsPath(tempPath)
 		if err != nil {
 			bean.GetLoggerBean().Error("获取当前笔记等级失败!", zap.Error(err))
@@ -202,24 +203,22 @@ func Refresh(c *gin.Context) {
 	var resultLock sync.Mutex
 	// 用于记录所有执行 OutNoteByPath 的 goroutine
 	var noteWg sync.WaitGroup
+	var stopWg sync.WaitGroup
 
 	for _, v := range files {
 		noteWg.Add(1)
 		go NoteUtil.OutNoteByPath(tempPath+string(os.PathSeparator)+v.Name(),
 			currentWorkspace, v,
 			startChan, endChan,
+			&stopWg,
 			&result, &resultLock,
 			&noteWg, tempLevel,
 			allNote)
 	}
-	var stopWg sync.WaitGroup
-	stopWg.Add(1)
 	go func() {
-		defer stopWg.Done()
 		for {
 			select {
 			case i := <-startChan:
-				stopWg.Add(1)
 				buf, _ := json.Marshal(i)
 				_ = ws.WriteMessage(websocket.TextMessage, buf)
 			case i := <-endChan:
@@ -229,7 +228,6 @@ func Refresh(c *gin.Context) {
 					case ti := <-startChan:
 						buf, _ := json.Marshal(ti)
 						_ = ws.WriteMessage(websocket.TextMessage, buf)
-						stopWg.Add(1)
 					default:
 						break priority1
 					}

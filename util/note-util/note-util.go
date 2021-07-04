@@ -20,6 +20,7 @@ import (
 // - file：当前文件信息
 // - startChan：开始通道
 // - endChan：结束通道
+// - stopWg：没加入一个start就加一
 // - noteWg：标识所有 OutNoteByPath 方法执行完成的 wg
 // - level：当前文件的等级
 // - noteList：当前所有 Note，用于判断当前result。
@@ -27,6 +28,7 @@ func OutNoteByPath(path string,
 	workspace entity.Workspace,
 	file fs.FileInfo,
 	startChan chan<- vo.NoteReadVo, endChan chan<- vo.NoteReadVo,
+	stopWg *sync.WaitGroup,
 	result *[]entity.Note, resultLock *sync.Mutex,
 	noteWg *sync.WaitGroup, level int,
 	noteList []entity.Note) {
@@ -37,6 +39,7 @@ func OutNoteByPath(path string,
 				Path:   path,
 				Result: enum.NoteReadResultStart,
 			}
+			stopWg.Add(1)
 			tempEntity := entity.Note{
 				Id:            uuid.New(),
 				AbsPath:       path,
@@ -71,6 +74,11 @@ func OutNoteByPath(path string,
 		}
 		return
 	} else {
+		startChan <- vo.NoteReadVo{
+			Path:   path,
+			Result: enum.NoteReadResultStart,
+		}
+		stopWg.Add(1)
 		tempEntity := entity.Note{
 			Id:            uuid.New(),
 			AbsPath:       path,
@@ -78,7 +86,7 @@ func OutNoteByPath(path string,
 			Name:          file.Name(),
 			WorkspaceId:   workspace.Id,
 			ParentPath:    string(os.PathSeparator) + file.Name(),
-			ParentAbsPath: strings.TrimSuffix(strings.TrimPrefix(path, workspace.Path), string(os.PathSeparator)+file.Name()),
+			ParentAbsPath: strings.TrimSuffix(path, string(os.PathSeparator)+file.Name()),
 			Level:         level,
 			Show:          true,
 			IsDir:         true,
@@ -100,6 +108,7 @@ func OutNoteByPath(path string,
 			go OutNoteByPath(path+string(os.PathSeparator)+v.Name(),
 				workspace, v,
 				startChan, endChan,
+				stopWg,
 				result, resultLock,
 				noteWg, level+1,
 				noteList)
@@ -109,6 +118,7 @@ func OutNoteByPath(path string,
 					Path:   path + string(os.PathSeparator) + v.Name(),
 					Result: enum.NoteReadResultStart,
 				}
+				stopWg.Add(1)
 				tempEntity := entity.Note{
 					Id:            uuid.New(),
 					AbsPath:       path + string(os.PathSeparator) + v.Name(),
