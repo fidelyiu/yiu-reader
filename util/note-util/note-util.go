@@ -26,11 +26,14 @@ import (
 func OutNoteByPath(path string,
 	workspace entity.Workspace,
 	file fs.FileInfo,
-	startChan chan<- string, endChan chan<- vo.NoteReadEndVo,
+	startChan chan<- vo.NoteReadVo, endChan chan<- vo.NoteReadVo,
 	result *[]entity.Note, resultLock *sync.Mutex,
 	noteWg *sync.WaitGroup, level int,
 	noteList []entity.Note) {
-	startChan <- path
+	startChan <- vo.NoteReadVo{
+		Path:   path,
+		Result: enum.NoteReadResultStart,
+	}
 	defer noteWg.Done()
 	if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
 		tempEntity := entity.Note{
@@ -51,7 +54,7 @@ func OutNoteByPath(path string,
 			*result = append(*result, tempEntity)
 			resultLock.Unlock()
 		}
-		endChan <- vo.NoteReadEndVo{
+		endChan <- vo.NoteReadVo{
 			Path:   path,
 			Result: tempResult,
 		}
@@ -60,7 +63,7 @@ func OutNoteByPath(path string,
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		bean.GetLoggerBean().Error("文件读取失败!", zap.Error(err))
-		endChan <- vo.NoteReadEndVo{
+		endChan <- vo.NoteReadVo{
 			Path:   path,
 			Result: enum.NoteReadResultFail,
 		}
@@ -84,7 +87,7 @@ func OutNoteByPath(path string,
 			*result = append(*result, tempEntity)
 			resultLock.Unlock()
 		}
-		endChan <- vo.NoteReadEndVo{
+		endChan <- vo.NoteReadVo{
 			Path:   path,
 			Result: tempResult,
 		}
@@ -100,7 +103,10 @@ func OutNoteByPath(path string,
 				noteList)
 		} else {
 			if strings.HasSuffix(v.Name(), ".md") {
-				startChan <- path + string(os.PathSeparator) + v.Name()
+				startChan <- vo.NoteReadVo{
+					Path:   path + string(os.PathSeparator) + v.Name(),
+					Result: enum.NoteReadResultStart,
+				}
 				tempEntity := entity.Note{
 					Id:            uuid.New(),
 					AbsPath:       path + string(os.PathSeparator) + v.Name(),
@@ -119,7 +125,7 @@ func OutNoteByPath(path string,
 					*result = append(*result, tempEntity)
 					resultLock.Unlock()
 				}
-				endChan <- vo.NoteReadEndVo{
+				endChan <- vo.NoteReadVo{
 					Path:   path + string(os.PathSeparator) + v.Name(),
 					Result: tempResult,
 				}

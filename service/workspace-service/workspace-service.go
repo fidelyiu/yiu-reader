@@ -1,7 +1,7 @@
 package WorkspaceService
 
 import (
-	YiuInt "github.com/fidelyiu/yiu-go/int"
+	"encoding/json"
 	YiuStr "github.com/fidelyiu/yiu-go/string"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -193,9 +193,9 @@ func Refresh(c *gin.Context) {
 	}
 
 	// 开始读取的管道通知
-	startChan := make(chan string, 50)
+	startChan := make(chan vo.NoteReadVo, 50)
 	// 读取结束的管道通知
-	endChan := make(chan vo.NoteReadEndVo, 50)
+	endChan := make(chan vo.NoteReadVo, 50)
 	stopCh := make(chan struct{})
 	// 接收结果
 	var result []entity.Note
@@ -220,19 +220,22 @@ func Refresh(c *gin.Context) {
 			select {
 			case i := <-startChan:
 				stopWg.Add(1)
-				_ = ws.WriteMessage(websocket.TextMessage, []byte(i))
+				buf, _ := json.Marshal(i)
+				_ = ws.WriteMessage(websocket.TextMessage, buf)
 			case i := <-endChan:
 			priority1:
 				for {
 					select {
 					case ti := <-startChan:
-						_ = ws.WriteMessage(websocket.TextMessage, []byte(ti))
+						buf, _ := json.Marshal(ti)
+						_ = ws.WriteMessage(websocket.TextMessage, buf)
 						stopWg.Add(1)
 					default:
 						break priority1
 					}
 				}
-				_ = ws.WriteMessage(websocket.TextMessage, []byte(i.Path+"-"+YiuInt.ToStr(int(i.Result))))
+				buf, _ := json.Marshal(i)
+				_ = ws.WriteMessage(websocket.TextMessage, buf)
 				stopWg.Done()
 			case <-stopCh:
 				return
