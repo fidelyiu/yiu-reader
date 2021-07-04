@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	LayoutController "yiu/yiu-reader/controller/layout-controller"
 	MainController "yiu/yiu-reader/controller/main-controller"
+	NoteController "yiu/yiu-reader/controller/note-controller"
 	WorkspaceController "yiu/yiu-reader/controller/workspace-controller"
 	OpUtil "yiu/yiu-reader/util/op-util"
 )
@@ -35,7 +36,6 @@ func main() {
 		workspaceGroup.DELETE("/:id", WorkspaceController.Delete)
 		workspaceGroup.PUT("/up/:id", WorkspaceController.Up)
 		workspaceGroup.PUT("/down/:id", WorkspaceController.Down)
-		workspaceGroup.GET("/refresh", WorkspaceController.Refresh)
 		// workspaceGroup.GET("/content", WorkspaceController.Content)
 	}
 
@@ -47,6 +47,12 @@ func main() {
 		layoutGroup.DELETE("/:id", LayoutController.Delete)
 		layoutGroup.PUT("", LayoutController.Update)
 		layoutGroup.GET("/:id", LayoutController.View)
+	}
+
+	noteGroup := router.Group("/note")
+	{
+		noteGroup.GET("/refresh", NoteController.Refresh)
+		noteGroup.POST("/tree", NoteController.SearchTree)
 	}
 
 	_ = router.Run(":8081")
