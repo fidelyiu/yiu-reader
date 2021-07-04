@@ -30,33 +30,35 @@ func OutNoteByPath(path string,
 	result *[]entity.Note, resultLock *sync.Mutex,
 	noteWg *sync.WaitGroup, level int,
 	noteList []entity.Note) {
-	startChan <- vo.NoteReadVo{
-		Path:   path,
-		Result: enum.NoteReadResultStart,
-	}
 	defer noteWg.Done()
-	if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-		tempEntity := entity.Note{
-			Id:            uuid.New(),
-			AbsPath:       path,
-			Path:          strings.TrimPrefix(path, workspace.Path),
-			Name:          file.Name(),
-			WorkspaceId:   workspace.Id,
-			ParentPath:    string(os.PathSeparator) + file.Name(),
-			ParentAbsPath: strings.TrimSuffix(strings.TrimPrefix(path, workspace.Path), string(os.PathSeparator)+file.Name()),
-			Level:         level,
-			Show:          true,
-			IsDir:         false,
-		}
-		tempResult := noteListIsInclude(noteList, tempEntity)
-		if tempResult == enum.NoteReadResultNotImport {
-			resultLock.Lock()
-			*result = append(*result, tempEntity)
-			resultLock.Unlock()
-		}
-		endChan <- vo.NoteReadVo{
-			Path:   path,
-			Result: tempResult,
+	if !file.IsDir() {
+		if strings.HasSuffix(file.Name(), ".md") {
+			startChan <- vo.NoteReadVo{
+				Path:   path,
+				Result: enum.NoteReadResultStart,
+			}
+			tempEntity := entity.Note{
+				Id:            uuid.New(),
+				AbsPath:       path,
+				Path:          strings.TrimPrefix(path, workspace.Path),
+				Name:          file.Name(),
+				WorkspaceId:   workspace.Id,
+				ParentPath:    string(os.PathSeparator) + file.Name(),
+				ParentAbsPath: strings.TrimSuffix(strings.TrimPrefix(path, workspace.Path), string(os.PathSeparator)+file.Name()),
+				Level:         level,
+				Show:          true,
+				IsDir:         false,
+			}
+			tempResult := noteListIsInclude(noteList, tempEntity)
+			if tempResult == enum.NoteReadResultNotImport {
+				resultLock.Lock()
+				*result = append(*result, tempEntity)
+				resultLock.Unlock()
+			}
+			endChan <- vo.NoteReadVo{
+				Path:   path,
+				Result: tempResult,
+			}
 		}
 		return
 	}

@@ -140,7 +140,7 @@ var upGrader = websocket.Upgrader{
 }
 
 func Refresh(c *gin.Context) {
-	path := c.Param("path")
+	path := c.Query("path")
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
