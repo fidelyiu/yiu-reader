@@ -212,31 +212,38 @@ func Refresh(c *gin.Context) {
 			&noteWg, tempLevel,
 			allNote)
 	}
-
+	var stopWg sync.WaitGroup
+	stopWg.Add(1)
 	go func() {
+		defer stopWg.Done()
 		for {
 			select {
-			case <-stopCh:
-				return
 			case i := <-startChan:
+				stopWg.Add(1)
 				_ = ws.WriteMessage(websocket.TextMessage, []byte(i))
 			case i := <-endChan:
-			priority:
+			priority1:
 				for {
 					select {
 					case ti := <-startChan:
 						_ = ws.WriteMessage(websocket.TextMessage, []byte(ti))
+						stopWg.Add(1)
 					default:
-						break priority
+						break priority1
 					}
 				}
 				_ = ws.WriteMessage(websocket.TextMessage, []byte(i.Path+"-"+YiuInt.ToStr(int(i.Result))))
+				stopWg.Done()
+			case <-stopCh:
+				return
 			}
 		}
 	}()
+	// 确保 goroutine 都执行完成
 	noteWg.Wait()
+	// 确保所有 endChan 都被处理
+	stopWg.Wait()
 	stopCh <- struct{}{}
-
 	// 将所有 noteResult 保存起来
 	err = NoteDao.SaveAll(result)
 	if err != nil {
