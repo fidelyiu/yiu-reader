@@ -186,7 +186,7 @@ func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
 
 	for i := range result {
 		if result[i].Data.IsDir {
-			result[i].Child = getChild(result[i].Data, append(noteList[:i], noteList[i+1:]...))
+			result[i].Child = getChild(result[i].Data, noteList)
 		}
 	}
 	if len(result) != 0 {
