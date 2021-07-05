@@ -186,7 +186,7 @@ func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
 
 	for i := range result {
 		if result[i].Data.IsDir {
-			result[i].Child = getChild(result[i].Data, noteList)
+			result[i].Child = GetChild(result[i].Data, noteList)
 		}
 	}
 	if len(result) != 0 {
@@ -197,7 +197,7 @@ func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
 	return result
 }
 
-func getChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
+func GetChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
 	var result []vo.NoteTreeVo
 	if len(noteList) == 0 {
 		return result
@@ -206,7 +206,7 @@ func getChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
 		if noteList[i].ParentId == parent.Id {
 			result = append(result, vo.NoteTreeVo{
 				Data:  noteList[i],
-				Child: getChild(noteList[i], noteList),
+				Child: GetChild(noteList[i], noteList),
 			})
 		}
 	}

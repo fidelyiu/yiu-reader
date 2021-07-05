@@ -55,6 +55,7 @@ func main() {
 		noteGroup.POST("/tree", NoteController.SearchTree)
 		noteGroup.GET("", NoteController.Search)
 		noteGroup.DELETE("/:id", NoteController.Delete)
+		noteGroup.DELETE("/file/:id", NoteController.DeleteFile)
 	}
 
 	_ = router.Run(":8081")

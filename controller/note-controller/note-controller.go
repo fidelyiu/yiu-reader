@@ -21,3 +21,7 @@ func Search(c *gin.Context) {
 func Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.Delete(c))
 }
+
+func DeleteFile(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.DeleteFile(c))
+}

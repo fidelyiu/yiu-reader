@@ -62,6 +62,32 @@ func FindByAbsPath(absPath string) (entity.Note, error) {
 	}
 }
 
+func FindByParentId(id string) ([]entity.Note, error) {
+	if id == "" {
+		return nil, errors.New("id不能为空")
+	}
+	stringList, err := dao.FindAllByTableName(bean.GetDbBean(), tableName)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]entity.Note, 0)
+	for _, v := range stringList {
+		var resultItem entity.Note
+		err := json.Unmarshal([]byte(v), &resultItem)
+		if err == nil {
+			appendItem := true
+			_ = resultItem.CheckPath()
+			if id == resultItem.ParentId {
+				appendItem = false
+			}
+			if appendItem {
+				result = append(result, resultItem)
+			}
+		}
+	}
+	return result, err
+}
+
 // FindBySearchDto 根据搜索条件查询
 func FindBySearchDto(dto dto.NoteSearchDto) ([]entity.Note, error) {
 	stringList, err := dao.FindAllByTableName(bean.GetDbBean(), tableName)
@@ -134,4 +160,71 @@ func Update(entity *entity.Note) error {
 
 func DeleteById(id string) error {
 	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+}
+
+func DeleteDeepById(id string) error {
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+	err = deleteDeepById(id, table)
+	if err != nil {
+		return err
+	}
+	// 提交事务
+	err = tx.Commit()
+	return err
+}
+
+func deleteDeepById(id string, table *bbolt.Bucket) error {
+	var target entity.Note
+	err := json.Unmarshal(table.Get([]byte(id)), &target)
+	if err != nil {
+		return err
+	}
+	child := make([]entity.Note, 0)
+	err = table.ForEach(func(_, v []byte) error {
+		var item entity.Note
+		err = json.Unmarshal(v, &item)
+		if err != nil {
+			return err
+		}
+		if item.ParentId == id {
+			child = append(child, item)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	if len(child) != 0 {
+		for i := range child {
+			err = deleteDeepById(child[i].Id, table)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	err = table.Delete([]byte(id))
+	return err
+}
+
+func FindById(id string) (entity.Note, error) {
+	v, err := dao.FindByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+	if len(v) == 0 {
+		return entity.Note{}, errors.New("[" + id + "]" + entityName + "无效")
+	}
+	if err != nil {
+		return entity.Note{}, err
+	}
+	var result entity.Note
+	err = json.Unmarshal([]byte(v), &result)
+	return result, err
 }

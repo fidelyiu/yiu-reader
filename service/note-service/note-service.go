@@ -148,7 +148,7 @@ func Refresh(c *gin.Context) {
 		return
 	}
 	for i := range allNote {
-		if allNote[i].ParentId == "" && allNote[i].Level != 1 {
+		if allNote[i].Level != 1 {
 			parentEntity, err := NoteDao.FindByAbsPath(allNote[i].ParentAbsPath)
 			if err != nil {
 				bean.GetLoggerBean().Error("根据"+allNote[i].ParentAbsPath+"找不到笔记!", zap.Error(err))
@@ -164,10 +164,64 @@ func Refresh(c *gin.Context) {
 	}
 }
 
+func DeleteFile(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	target, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据ID获取"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	allData, err := NoteDao.FindAll()
+	if err != nil {
+		bean.GetLoggerBean().Error("获取所有"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	child := NoteUtil.GetChild(target, allData)
+	err = deleteFileByTargetAndItChild(target, child)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"文件过程中出错，稍后重试!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	deleteByTargetAndItChild(target, child)
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func deleteFileByTargetAndItChild(target entity.Note, child []vo.NoteTreeVo) error {
+	if len(child) != 0 {
+		for i := range child {
+			err := deleteFileByTargetAndItChild(child[i].Data, child[i].Child)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if target.Status == enum.ObjStatusValid {
+		// 删除文件
+		err := os.Remove(target.AbsPath)
+		return err
+	}
+	return nil
+}
+
+func deleteByTargetAndItChild(target entity.Note, child []vo.NoteTreeVo) {
+	if len(child) != 0 {
+		for i := range child {
+			deleteByTargetAndItChild(child[i].Data, child[i].Child)
+		}
+	}
+	// 删除自己
+	_ = NoteDao.DeleteById(target.Id)
+}
+
 func Delete(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	id := c.Param("id")
-	err := NoteDao.DeleteById(id)
+	err := NoteDao.DeleteDeepById(id)
 	if err != nil {
 		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
 		result.ToError(err.Error())
