@@ -186,7 +186,12 @@ func DeleteFile(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	deleteByTargetAndItChild(target, child)
+	err = NoteDao.DeleteDeepById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"记录过程中出错，稍后重试!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
@@ -206,16 +211,6 @@ func deleteFileByTargetAndItChild(target entity.Note, child []vo.NoteTreeVo) err
 		return err
 	}
 	return nil
-}
-
-func deleteByTargetAndItChild(target entity.Note, child []vo.NoteTreeVo) {
-	if len(child) != 0 {
-		for i := range child {
-			deleteByTargetAndItChild(child[i].Data, child[i].Child)
-		}
-	}
-	// 删除自己
-	_ = NoteDao.DeleteById(target.Id)
 }
 
 func Delete(c *gin.Context) response.YiuReaderResponse {
