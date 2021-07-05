@@ -243,7 +243,7 @@ func Search(c *gin.Context) response.YiuReaderResponse {
 
 func SearchTree(c *gin.Context) response.YiuReaderResponse {
 	var searchDto dto.NoteSearchDto
-	_ = c.ShouldBindQuery(&searchDto)
+	_ = c.ShouldBindJSON(&searchDto)
 
 	result := response.YiuReaderResponse{}
 
