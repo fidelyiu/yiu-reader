@@ -174,6 +174,12 @@ func Position(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
+	err = target.CheckPath()
+	if err != nil {
+		result.ToError(err.Error())
+		return result
+	}
+
 	// target.AbsPath
 	err = yiuOs.DoOpenFileManagerByParent(target.AbsPath)
 	if err != nil {
