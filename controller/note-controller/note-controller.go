@@ -29,3 +29,7 @@ func DeleteFile(c *gin.Context) {
 func Position(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.Position(c))
 }
+
+func ChangeShow(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.ChangeShow(c))
+}

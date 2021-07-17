@@ -165,6 +165,26 @@ func Refresh(c *gin.Context) {
 	}
 }
 
+func ChangeShow(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	target, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据ID获取"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	target.Show = !target.Show
+	err = NoteDao.Update(&target)
+	if err != nil {
+		bean.GetLoggerBean().Error("更新"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
 func Position(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	id := c.Param("id")
