@@ -2,8 +2,8 @@ package dao
 
 import (
 	"errors"
-	YiuStr "github.com/fidelyiu/yiu-go/string"
-	YiuStrList "github.com/fidelyiu/yiu-go/string_list"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
+	yiuStrList "github.com/fidelyiu/yiu-go-tool/string_list"
 	"go.etcd.io/bbolt"
 )
 
@@ -113,15 +113,15 @@ func DeleteByTableNameAndKey(db *bbolt.DB, tableName string, key string, entityN
 
 // GetTableByName 根据字符串获取数据库中的表
 func GetTableByName(tx *bbolt.Tx, tableName string) *bbolt.Bucket {
-	if YiuStr.IsBlank(tableName) {
+	if yiuStr.IsBlank(tableName) {
 		return nil
 	}
-	tableNameList := YiuStr.ToStrList(tableName, ".")
+	tableNameList := yiuStr.ToStrListBySep(tableName, ".")
 	baseBucket := tx.Bucket([]byte(tableNameList[0]))
 	if len(tableNameList) <= 1 {
 		return baseBucket
 	}
-	YiuStrList.OpDeleteByIndex(&tableNameList, 0)
+	yiuStrList.OpDeleteByIndex(&tableNameList, 0)
 	for _, v := range tableNameList {
 		baseBucket = baseBucket.Bucket([]byte(v))
 	}

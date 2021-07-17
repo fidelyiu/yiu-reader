@@ -1,8 +1,8 @@
 package OpUtil
 
 import (
-	YiuDir "github.com/fidelyiu/yiu-go/dir"
-	YiuLogger "github.com/fidelyiu/yiu-go/logger"
+	yiuDir "github.com/fidelyiu/yiu-go-tool/dir"
+	yiuLog "github.com/fidelyiu/yiu-go-tool/log"
 	"go.etcd.io/bbolt"
 	"path"
 	"yiu/yiu-reader/bean"
@@ -12,8 +12,8 @@ import (
 func CreateDB(path string) {
 	db, err := OpenBoltDB(".yiu/yiu-reader.db")
 	if err != nil {
-		YiuLogger.LogErrorLn("打开数据库出错：")
-		YiuLogger.LogErrorLn(err)
+		yiuLog.ErrorLn("打开数据库出错：")
+		yiuLog.ErrorLn(err)
 		return
 	}
 	bean.SetDbBean(db)
@@ -26,16 +26,16 @@ func CloseDB() {
 	}
 	err := db.Close()
 	if err != nil {
-		YiuLogger.LogErrorLn("关闭数据库出错：")
-		YiuLogger.LogErrorLn(err)
+		yiuLog.ErrorLn("关闭数据库出错：")
+		yiuLog.ErrorLn(err)
 		return
 	}
 }
 
 func OpenBoltDB(dbPath string) (*bbolt.DB, error) {
 	dirPath := path.Dir(dbPath)
-	if !YiuDir.IsExists(dirPath) {
-		err := YiuDir.OpMkDirAll(dirPath)
+	if !yiuDir.IsExists(dirPath) {
+		err := yiuDir.DoMkDirAll(dirPath)
 		if err != nil {
 			return nil, err
 		}

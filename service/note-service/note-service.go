@@ -2,7 +2,8 @@ package NoteService
 
 import (
 	"encoding/json"
-	YiuStr "github.com/fidelyiu/yiu-go/string"
+	yiuOs "github.com/fidelyiu/yiu-go-tool/os"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
@@ -57,10 +58,10 @@ func Refresh(c *gin.Context) {
 	// 工具当前工作空间的路径获取所有数据
 	tempPath := currentWorkspace.Path
 	tempLevel := 1
-	YiuStr.OpFormatPathSeparator(&tempPath)
+	yiuStr.OpFormatPathSeparator(&tempPath)
 	if path != "" {
 		tempPath += string(os.PathSeparator) + path
-		YiuStr.OpFormatPathSeparator(&tempPath)
+		yiuStr.OpFormatPathSeparator(&tempPath)
 		dbNote, err := NoteDao.FindByAbsPath(tempPath)
 		if err != nil {
 			bean.GetLoggerBean().Error("获取当前笔记等级失败!", zap.Error(err))
@@ -164,6 +165,26 @@ func Refresh(c *gin.Context) {
 	}
 }
 
+func Position(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	target, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据ID获取"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	// target.AbsPath
+	err = yiuOs.DoOpenFileManagerByParent(target.AbsPath)
+	if err != nil {
+		bean.GetLoggerBean().Error("打开文件管理器失败!路径为\""+target.AbsPath+"\"", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
 func DeleteFile(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	id := c.Param("id")
@@ -179,7 +200,7 @@ func DeleteFile(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	child := NoteUtil.GetChild(target, allData)
+	child := NoteUtil.GetChild(target, allData, false)
 	err = deleteFileByTargetAndItChild(target, child)
 	if err != nil {
 		bean.GetLoggerBean().Error("删除"+serviceName+"文件过程中出错，稍后重试!", zap.Error(err))
@@ -265,7 +286,7 @@ func SearchTree(c *gin.Context) response.YiuReaderResponse {
 	if searchDto.Path != "" {
 		// 找对应文件夹的笔记
 		searchDto.Path = currentWorkspace.Path + string(os.PathSeparator) + searchDto.Path
-		YiuStr.OpFormatPathSeparator(&searchDto.Path)
+		yiuStr.OpFormatPathSeparator(&searchDto.Path)
 		dbNote, err := NoteDao.FindByAbsPath(searchDto.Path)
 		if err != nil {
 			bean.GetLoggerBean().Error("获取当前笔记ID失败!", zap.Error(err))
@@ -283,7 +304,7 @@ func SearchTree(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	result.Result = NoteUtil.GetTree(allNote)
+	result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

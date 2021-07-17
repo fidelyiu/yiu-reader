@@ -1,7 +1,7 @@
 package LayoutService
 
 import (
-	YiuStr "github.com/fidelyiu/yiu-go/string"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"yiu/yiu-reader/bean"
@@ -30,7 +30,7 @@ func Add(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	var addEntity entity.Layout
 	err := c.ShouldBindJSON(&addEntity)
-	maxX := YiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
+	maxX := yiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
 	if err != nil {
 		bean.GetLoggerBean().Error("添加"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
 		result.ToError(err.Error())
@@ -79,7 +79,7 @@ func Delete(c *gin.Context) response.YiuReaderResponse {
 
 func ResizePosition(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	maxX := YiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
+	maxX := yiuStr.ToInt(c.DefaultQuery("maxX", "1080"))
 	var resizeEntity entity.Layout
 	err := c.ShouldBindJSON(&resizeEntity)
 	if err != nil {

@@ -3,7 +3,7 @@ package NoteDao
 import (
 	"encoding/json"
 	"errors"
-	YiuStr "github.com/fidelyiu/yiu-go/string"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"go.etcd.io/bbolt"
 	"yiu/yiu-reader/bean"
 	"yiu/yiu-reader/dao"
@@ -103,11 +103,11 @@ func FindBySearchDto(dto dto.NoteSearchDto) ([]entity.Note, error) {
 			_ = resultItem.CheckPath()
 
 			// 工作空间ID
-			if YiuStr.IsNotBlank(dto.WorkspaceId) && resultItem.WorkspaceId != dto.WorkspaceId {
+			if yiuStr.IsNotBlank(dto.WorkspaceId) && resultItem.WorkspaceId != dto.WorkspaceId {
 				appendItem = false
 			}
 			// 父路径
-			if YiuStr.IsNotBlank(dto.ParentId) && resultItem.ParentId != dto.ParentId {
+			if yiuStr.IsNotBlank(dto.ParentId) && resultItem.ParentId != dto.ParentId {
 				appendItem = false
 			}
 

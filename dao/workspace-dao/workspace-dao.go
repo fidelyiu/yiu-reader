@@ -3,7 +3,7 @@ package WorkspaceDao
 import (
 	"encoding/json"
 	"errors"
-	YiuStr "github.com/fidelyiu/yiu-go/string"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"github.com/go-basic/uuid"
 	"go.etcd.io/bbolt"
 	"sort"
@@ -80,18 +80,18 @@ func FindAllBySearchDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) 
 		if err == nil {
 			appendItem := true
 			// 关键字过滤
-			if YiuStr.IsNotBlank(dto.Key) &&
+			if yiuStr.IsNotBlank(dto.Key) &&
 				!strings.Contains(resultItem.Name, dto.Key) &&
 				!strings.Contains(resultItem.Path, dto.Key) {
 				appendItem = false
 			}
 			statusErr := resultItem.CheckPath()
 			// 名称过滤
-			if YiuStr.IsNotBlank(dto.Name) && !strings.Contains(resultItem.Name, dto.Name) {
+			if yiuStr.IsNotBlank(dto.Name) && !strings.Contains(resultItem.Name, dto.Name) {
 				appendItem = false
 			}
 			// 路径过滤
-			if YiuStr.IsNotBlank(dto.Path) && !strings.Contains(resultItem.Path, dto.Path) {
+			if yiuStr.IsNotBlank(dto.Path) && !strings.Contains(resultItem.Path, dto.Path) {
 				appendItem = false
 			}
 			// 过滤是否有效
@@ -132,11 +132,11 @@ func SearchByDto(dto dto.WorkspaceSearchDto) ([]entity.Workspace, error) {
 
 func Update(updateEntity *entity.Workspace) error {
 	var dbEntity entity.Workspace
-	if YiuStr.IsNotBlank(updateEntity.Id) {
+	if yiuStr.IsNotBlank(updateEntity.Id) {
 		dbEntity, _ = FindById(updateEntity.Id)
 	}
 	// 不能修改序号
-	if YiuStr.IsBlank(dbEntity.Id) {
+	if yiuStr.IsBlank(dbEntity.Id) {
 		return errors.New("修改" + entityName + "报错，id不能为空")
 	} else {
 		updateEntity.SortNum = dbEntity.SortNum

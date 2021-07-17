@@ -2,7 +2,7 @@ package entity
 
 import (
 	"errors"
-	YiuErrorList "github.com/fidelyiu/yiu-go/error_list"
+	yiuSErr "github.com/fidelyiu/yiu-go-tool/error_s"
 	"time"
 	"yiu/yiu-reader/model/enum"
 )
@@ -61,10 +61,10 @@ func (l *Layout) CheckSetting() error {
 }
 
 func (l *Layout) Check() error {
-	return YiuErrorList.ToError([]error{
+	return yiuSErr.ToErrorBySep(" & ",
 		l.CheckType(),
 		l.CheckStatus(),
 		l.CheckWidth(),
 		l.CheckHeight(),
-	}, " & ")
+	)
 }

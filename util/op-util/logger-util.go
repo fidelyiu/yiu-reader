@@ -1,7 +1,7 @@
 package OpUtil
 
 import (
-	YiuLogger "github.com/fidelyiu/yiu-go/logger"
+	yiuLog "github.com/fidelyiu/yiu-go-tool/log"
 	"go.uber.org/zap"
 	"yiu/yiu-reader/bean"
 )
@@ -9,8 +9,8 @@ import (
 func CreateLogger() {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
-		YiuLogger.LogErrorLn("日志初始化出错：")
-		YiuLogger.LogErrorLn(err)
+		yiuLog.ErrorLn("日志初始化出错：")
+		yiuLog.ErrorLn(err)
 		return
 	}
 	bean.SetLoggerBean(logger)

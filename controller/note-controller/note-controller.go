@@ -25,3 +25,7 @@ func Delete(c *gin.Context) {
 func DeleteFile(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.DeleteFile(c))
 }
+
+func Position(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Position(c))
+}

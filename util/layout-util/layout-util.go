@@ -1,7 +1,7 @@
 package LayoutUtil
 
 import (
-	YiuInt "github.com/fidelyiu/yiu-go/int"
+	yiuInt "github.com/fidelyiu/yiu-go-tool/int"
 	"yiu/yiu-reader/model/entity"
 )
 
@@ -72,8 +72,8 @@ func (b *box) isEqual(target box) bool {
 
 // 两个盒子是否相交
 func (b *box) hasIntersect(target box) bool {
-	return YiuInt.IsIntersect(b.getMinX(), b.getMaxX(), target.getMinX(), target.getMaxX(), false) &&
-		YiuInt.IsIntersect(b.getMinY(), b.getMaxY(), target.getMinY(), target.getMaxY(), false)
+	return yiuInt.IsIntersect(b.getMinX(), b.getMaxX(), target.getMinX(), target.getMaxX(), false) &&
+		yiuInt.IsIntersect(b.getMinY(), b.getMaxY(), target.getMinY(), target.getMaxY(), false)
 }
 
 // pointInBox 点是否在盒子中

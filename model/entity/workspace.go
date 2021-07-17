@@ -2,8 +2,8 @@ package entity
 
 import (
 	"errors"
-	YiuErrorList "github.com/fidelyiu/yiu-go/error_list"
-	YiuStr "github.com/fidelyiu/yiu-go/string"
+	yiuSErr "github.com/fidelyiu/yiu-go-tool/error_s"
+	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"yiu/yiu-reader/model/enum"
 	PathUtil "yiu/yiu-reader/util/path-util"
 )
@@ -26,15 +26,15 @@ func (w *Workspace) CheckPath() error {
 }
 
 func (w *Workspace) CheckName() error {
-	if YiuStr.IsBlank(w.Name) {
+	if yiuStr.IsBlank(w.Name) {
 		return errors.New("工作空间名称不能为空")
 	}
 	return nil
 }
 
 func (w *Workspace) Check() error {
-	return YiuErrorList.ToError([]error{
+	return yiuSErr.ToErrorBySep(" & ",
 		w.CheckPath(),
 		w.CheckName(),
-	}, " & ")
+	)
 }

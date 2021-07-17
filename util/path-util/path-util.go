@@ -1,8 +1,8 @@
 package PathUtil
 
 import (
-	YiuDir "github.com/fidelyiu/yiu-go/dir"
-	YiuFile "github.com/fidelyiu/yiu-go/file"
+	yiuDir "github.com/fidelyiu/yiu-go-tool/dir"
+	yiuFile "github.com/fidelyiu/yiu-go-tool/file"
 	"path"
 	"path/filepath"
 )
@@ -12,7 +12,7 @@ import (
 // 2. 路径本身有效
 // 3. 文件夹
 func IsValidDir(str string) bool {
-	return filepath.IsAbs(str) && YiuDir.IsExists(str)
+	return filepath.IsAbs(str) && yiuDir.IsExists(str)
 }
 
 // IsValidFile 是否是有效的实体文件路径
@@ -20,7 +20,7 @@ func IsValidDir(str string) bool {
 // 2. 路径本身有效
 // 3. 文件
 func IsValidFile(str string) bool {
-	return filepath.IsAbs(str) && YiuFile.IsExists(str)
+	return filepath.IsAbs(str) && yiuDir.IsExists(str)
 }
 
 // IsValidMarkdown 是否是有效的实体Markdown文件路径
@@ -28,5 +28,5 @@ func IsValidFile(str string) bool {
 // 2. 路径本身有效
 // 3. 文件以`.md`结尾
 func IsValidMarkdown(str string) bool {
-	return path.IsAbs(str) && YiuFile.IsExists(str) && path.Ext(str) == ".md"
+	return path.IsAbs(str) && yiuFile.IsExists(str) && path.Ext(str) == ".md"
 }

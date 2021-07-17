@@ -163,7 +163,7 @@ func noteListIsInclude(noteList []entity.Note, it entity.Note) enum.NoteReadResu
 	return enum.NoteReadResultNotImport
 }
 
-func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
+func GetTree(noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
 	var result []vo.NoteTreeVo
 	if len(noteList) == 0 {
 		return result
@@ -184,9 +184,33 @@ func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
 		}
 	}
 
+	// 先将最高级的文件排序
+	if badFileEnd {
+		// [show，已排序]>>[show，未排序]>>[notShow，已排序]>>[notShow，未排序]
+		// 最后考虑排序数
+		sort.Slice(result, func(i, j int) bool {
+			// Show不一样
+			if result[i].Data.Show != result[j].Data.Show {
+				// true则i排在前面，false则i排在后面
+				return result[i].Data.Show
+			}
+			// Show一样，是否排序都大于0
+			if (result[i].Data.SortNum > 0) != (result[j].Data.SortNum > 0) {
+				// 大于0则排前面，小于等于0则排后面
+				return result[i].Data.SortNum > 0
+			}
+			return result[i].Data.SortNum < result[j].Data.SortNum
+		})
+	} else {
+		// 只考虑排序数
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].Data.SortNum < result[j].Data.SortNum
+		})
+	}
+
 	for i := range result {
 		if result[i].Data.IsDir {
-			result[i].Child = GetChild(result[i].Data, noteList)
+			result[i].Child = GetChild(result[i].Data, noteList, badFileEnd)
 		}
 	}
 	if len(result) != 0 {
@@ -197,7 +221,7 @@ func GetTree(noteList []entity.Note) []vo.NoteTreeVo {
 	return result
 }
 
-func GetChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
+func GetChild(parent entity.Note, noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
 	var result []vo.NoteTreeVo
 	if len(noteList) == 0 {
 		return result
@@ -206,14 +230,33 @@ func GetChild(parent entity.Note, noteList []entity.Note) []vo.NoteTreeVo {
 		if noteList[i].ParentId == parent.Id {
 			result = append(result, vo.NoteTreeVo{
 				Data:  noteList[i],
-				Child: GetChild(noteList[i], noteList),
+				Child: GetChild(noteList[i], noteList, badFileEnd),
 			})
 		}
 	}
 	if len(result) != 0 {
-		sort.Slice(result, func(i, j int) bool {
-			return result[i].Data.SortNum < result[j].Data.SortNum
-		})
+		if badFileEnd {
+			// [show，已排序]>>[show，未排序]>>[notShow，已排序]>>[notShow，未排序]
+			// 最后考虑排序数
+			sort.Slice(result, func(i, j int) bool {
+				// Show不一样
+				if result[i].Data.Show != result[j].Data.Show {
+					// true则i排在前面，false则i排在后面
+					return result[i].Data.Show
+				}
+				// Show一样，是否排序都大于0
+				if (result[i].Data.SortNum > 0) != (result[j].Data.SortNum > 0) {
+					// 大于0则排前面，小于等于0则排后面
+					return result[i].Data.SortNum > 0
+				}
+				return result[i].Data.SortNum < result[j].Data.SortNum
+			})
+		} else {
+			// 只考虑排序数
+			sort.Slice(result, func(i, j int) bool {
+				return result[i].Data.SortNum < result[j].Data.SortNum
+			})
+		}
 	}
 	return result
 }
