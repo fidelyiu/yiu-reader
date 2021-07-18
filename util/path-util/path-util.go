@@ -20,7 +20,7 @@ func IsValidDir(str string) bool {
 // 2. 路径本身有效
 // 3. 文件
 func IsValidFile(str string) bool {
-	return filepath.IsAbs(str) && yiuDir.IsExists(str)
+	return filepath.IsAbs(str) && yiuFile.IsExists(str)
 }
 
 // IsValidMarkdown 是否是有效的实体Markdown文件路径
