@@ -173,9 +173,9 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 	workspaceList := make([]entity.Workspace, 0)
 	err = table.ForEach(func(k, v []byte) error {
 		var vItem entity.Workspace
-		err := json.Unmarshal(v, &vItem)
-		if err != nil {
-			return err
+		itemErr := json.Unmarshal(v, &vItem)
+		if itemErr != nil {
+			return itemErr
 		}
 		workspaceList = append(workspaceList, vItem)
 		return nil

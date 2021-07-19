@@ -58,6 +58,8 @@ func main() {
 		noteGroup.DELETE("/file/:id", NoteController.DeleteFile)
 		noteGroup.GET("/position/:id", NoteController.Position)
 		noteGroup.GET("/change/show/:id", NoteController.ChangeShow)
+		noteGroup.PUT("/up/:id", NoteController.Up)
+		noteGroup.PUT("/down/:id", NoteController.Down)
 	}
 
 	_ = router.Run(":8080")

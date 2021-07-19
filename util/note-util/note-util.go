@@ -213,11 +213,6 @@ func GetTree(noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
 			result[i].Child = GetChild(result[i].Data, noteList, badFileEnd)
 		}
 	}
-	if len(result) != 0 {
-		sort.Slice(result, func(i, j int) bool {
-			return result[i].Data.SortNum < result[j].Data.SortNum
-		})
-	}
 	return result
 }
 

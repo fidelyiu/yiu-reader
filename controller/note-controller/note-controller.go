@@ -3,6 +3,7 @@ package NoteController
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"yiu/yiu-reader/model/enum"
 	NoteService "yiu/yiu-reader/service/note-service"
 )
 
@@ -32,4 +33,12 @@ func Position(c *gin.Context) {
 
 func ChangeShow(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.ChangeShow(c))
+}
+
+func Up(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.ChangeSort(c, enum.ChangeSortTypeUp))
+}
+
+func Down(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.ChangeSort(c, enum.ChangeSortTypeDown))
 }

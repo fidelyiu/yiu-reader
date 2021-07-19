@@ -5,10 +5,12 @@ import (
 	"errors"
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"go.etcd.io/bbolt"
+	"sort"
 	"yiu/yiu-reader/bean"
 	"yiu/yiu-reader/dao"
 	"yiu/yiu-reader/model/dto"
 	"yiu/yiu-reader/model/entity"
+	"yiu/yiu-reader/model/enum"
 	FieldUtil "yiu/yiu-reader/util/field-util"
 )
 
@@ -227,4 +229,114 @@ func FindById(id string) (entity.Note, error) {
 	var result entity.Note
 	err = json.Unmarshal([]byte(v), &result)
 	return result, err
+}
+
+func ChangeSort(id string, changeType enum.ChangeSortType) error {
+	// 检查ID是否有效
+	if !dao.IsEffectiveByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName) {
+		return errors.New("修改" + entityName + "报错，id无效")
+	}
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+
+	target, err := FindById(id)
+	if err != nil {
+		return err
+	}
+
+	var brotherList []entity.Note
+
+	err = table.ForEach(func(k, v []byte) error {
+		var vItem entity.Note
+		itemErr := json.Unmarshal(v, &vItem)
+		if itemErr != nil {
+			return itemErr
+		}
+		if vItem.ParentId == target.ParentId &&
+			vItem.Level == target.Level &&
+			vItem.Show == target.Show {
+			brotherList = append(brotherList, vItem)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(brotherList) == 0 {
+		return nil
+	}
+
+	// 排序
+	sort.Slice(brotherList, func(i, j int) bool {
+		if brotherList[i].SortNum == 0 {
+			return brotherList[i].Id == target.Id
+		}
+		if brotherList[j].SortNum == 0 {
+			return true
+		}
+		return brotherList[i].SortNum < brotherList[j].SortNum
+	})
+
+	// 找索引
+	targetIndex := -1
+
+	for i := range brotherList {
+		if target.Id == brotherList[i].Id {
+			targetIndex = i
+			break
+		}
+	}
+
+	if targetIndex == -1 {
+		return errors.New("移动目标异常")
+	}
+
+	if target.SortNum == 0 {
+		// 0交换，因为上面的排序，目标在0的第一位
+		brotherList[targetIndex].SortNum = 130
+	} else {
+		if len(brotherList) == 1 {
+			brotherList[targetIndex].SortNum = 130
+		} else {
+			// 非0交换
+			if changeType == enum.ChangeSortTypeUp {
+				if targetIndex != 0 {
+					brotherList[targetIndex-1], brotherList[targetIndex] = brotherList[targetIndex], brotherList[targetIndex-1]
+				}
+			} else {
+				if targetIndex != len(brotherList)-1 && brotherList[targetIndex+1].SortNum != 0 {
+					brotherList[targetIndex], brotherList[targetIndex+1] = brotherList[targetIndex+1], brotherList[targetIndex]
+				}
+			}
+		}
+	}
+
+	for i := range brotherList {
+		if brotherList[i].SortNum == 0 {
+			break
+		}
+		brotherList[i].SortNum = i + 1
+		updateByte, jsonErr := json.Marshal(brotherList[i])
+		if jsonErr != nil {
+			return jsonErr
+		}
+		putErr := table.Put([]byte(brotherList[i].Id), updateByte)
+		if putErr != nil {
+			return putErr
+		}
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	return err
 }

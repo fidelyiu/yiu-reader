@@ -175,6 +175,7 @@ func ChangeShow(c *gin.Context) response.YiuReaderResponse {
 		return result
 	}
 	target.Show = !target.Show
+	target.SortNum = 0
 	err = NoteDao.Update(&target)
 	if err != nil {
 		bean.GetLoggerBean().Error("更新"+serviceName+"出错!", zap.Error(err))
@@ -330,7 +331,37 @@ func SearchTree(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+	if searchDto.ParentId != "" {
+		tAllNote, allErr := NoteDao.FindAll()
+		if allErr != nil {
+			bean.GetLoggerBean().Error("获取所以偶工作空间笔记失败!", zap.Error(err))
+			result.ToError(allErr.Error())
+			return result
+		}
+		tempList := NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+
+		for i := range tempList {
+			if tempList[i].Data.IsDir {
+				tempList[i].Child = NoteUtil.GetChild(tempList[i].Data, tAllNote, searchDto.BadFileEnd)
+			}
+		}
+		result.Result = tempList
+	} else {
+		result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func ChangeSort(c *gin.Context, changeType enum.ChangeSortType) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	err := NoteDao.ChangeSort(id, changeType)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置"+serviceName+"序号出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
