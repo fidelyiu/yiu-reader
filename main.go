@@ -24,8 +24,19 @@ func main() {
 	router.LoadHTMLFiles("dist/index.html")
 	router.GET("/", MainController.IndexHTML)
 
-	router.GET("/current/workspace", MainController.GetCurrentWorkspace)
-	router.PUT("/current/workspace/:id", MainController.SetCurrentWorkspace)
+	mainGroup := router.Group("/main")
+	{
+		mainGroup.GET("/current/workspace", MainController.GetCurrentWorkspace)
+		mainGroup.PUT("/current/workspace/:id", MainController.SetCurrentWorkspace)
+		mainGroup.GET("/main/box/txt", MainController.GetMainBoxShowText)
+		mainGroup.PUT("/main/box/txt", MainController.SetMainBoxShowText)
+		mainGroup.GET("/main/box/icon", MainController.GetMainBoxShowIcon)
+		mainGroup.PUT("/main/box/icon", MainController.SetMainBoxShowIcon)
+		mainGroup.GET("/main/box/num", MainController.GetMainBoxShowNum)
+		mainGroup.PUT("/main/box/num", MainController.SetMainBoxShowNum)
+		mainGroup.GET("/sidebar/status", MainController.GetSidebarStatus)
+		mainGroup.PUT("/sidebar/status", MainController.SetSidebarStatus)
+	}
 
 	workspaceGroup := router.Group("/workspace")
 	{
