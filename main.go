@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	EditSoftController "yiu/yiu-reader/controller/edit-soft-controller"
 	LayoutController "yiu/yiu-reader/controller/layout-controller"
 	MainController "yiu/yiu-reader/controller/main-controller"
 	NoteController "yiu/yiu-reader/controller/note-controller"
@@ -71,6 +72,17 @@ func main() {
 		noteGroup.GET("/change/show/:id", NoteController.ChangeShow)
 		noteGroup.PUT("/up/:id", NoteController.Up)
 		noteGroup.PUT("/down/:id", NoteController.Down)
+	}
+
+	editSoftGroup := router.Group("/edit/soft")
+	{
+		editSoftGroup.POST("", EditSoftController.Add)
+		editSoftGroup.GET("", EditSoftController.Search)
+		editSoftGroup.GET("/:id", EditSoftController.View)
+		editSoftGroup.PUT("", EditSoftController.Update)
+		editSoftGroup.DELETE("/:id", EditSoftController.Delete)
+		editSoftGroup.PUT("/up/:id", EditSoftController.Up)
+		editSoftGroup.PUT("/down/:id", EditSoftController.Down)
 	}
 
 	_ = router.Run(":8080")

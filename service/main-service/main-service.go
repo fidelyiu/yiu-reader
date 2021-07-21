@@ -65,10 +65,7 @@ func SetCurrentWorkspace(c *gin.Context) response.YiuReaderResponse {
 
 func GetMainBoxShowText() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	showText, err := MainDao.GetMainBoxShowText()
-	if err != nil {
-		bean.GetLoggerBean().Error("获取当前主盒子是否展示提示错误!", zap.Error(err))
-	}
+	showText, _ := MainDao.GetMainBoxShowText()
 	result.Result = showText
 	result.SetType(enum.ResultTypeSuccess)
 	return result
@@ -99,10 +96,7 @@ func SetMainBoxShowText(c *gin.Context) response.YiuReaderResponse {
 
 func GetMainBoxShowIcon() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	showIcon, err := MainDao.GetMainBoxShowIcon()
-	if err != nil {
-		bean.GetLoggerBean().Error("获取当前主盒子是否展示提示Icon错误!", zap.Error(err))
-	}
+	showIcon, _ := MainDao.GetMainBoxShowIcon()
 	result.Result = showIcon
 	result.SetType(enum.ResultTypeSuccess)
 	return result
@@ -133,10 +127,7 @@ func SetMainBoxShowIcon(c *gin.Context) response.YiuReaderResponse {
 
 func GetMainBoxShowNum() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	showNum, err := MainDao.GetMainBoxShowNum()
-	if err != nil {
-		bean.GetLoggerBean().Error("获取当前主盒子是否展示提示序号错误!", zap.Error(err))
-	}
+	showNum, _ := MainDao.GetMainBoxShowNum()
 	result.Result = showNum
 	result.SetType(enum.ResultTypeSuccess)
 	return result
@@ -167,10 +158,7 @@ func SetMainBoxShowNum(c *gin.Context) response.YiuReaderResponse {
 
 func GetSidebarStatus() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	menuOpen, err := MainDao.GetSidebarStatus()
-	if err != nil {
-		bean.GetLoggerBean().Error("获取当前菜单是否展示错误!", zap.Error(err))
-	}
+	menuOpen, _ := MainDao.GetSidebarStatus()
 	result.Result = menuOpen
 	result.SetType(enum.ResultTypeSuccess)
 	return result

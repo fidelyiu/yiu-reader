@@ -8,13 +8,10 @@ const (
 	MainBoxShowIcon         = "main_box_show_icon"   // 主盒子_展示图标
 	MainBoxShowNum          = "main_box_show_num"    // 主盒子_展示序号
 
-	LayoutTable = "layout" // 布局表( MainTable 的子表)
-
-	WorkspaceTable = "workspace" // 工作空间表
-
-	NoteTable = "note" // 笔记表
-
-	MarkdownTable = "markdown" // Markdown文件表
-
-	ImageCacheTable = "image_cache" // 图片缓存表
+	LayoutTable     = "layout"          // 布局表( MainTable 的子表)
+	WorkspaceTable  = "workspace"       // 工作空间表
+	NoteTable       = "note"            // 笔记表
+	MarkdownTable   = "markdown"        // Markdown文件表
+	ImageCacheTable = "image_cache"     // 图片缓存表
+	EditSoftTable   = "edit_soft_cache" // 编辑软件表
 )
