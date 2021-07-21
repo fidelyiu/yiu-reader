@@ -382,7 +382,8 @@ func SearchTree(c *gin.Context) response.YiuReaderResponse {
 		return result
 	}
 	if searchDto.ParentId != "" {
-		tAllNote, allErr := NoteDao.FindAll()
+		searchDto.ParentId = ""
+		tAllNote, allErr := NoteDao.FindBySearchDto(searchDto)
 		if allErr != nil {
 			bean.GetLoggerBean().Error("获取所以偶工作空间笔记失败!", zap.Error(err))
 			result.ToError(allErr.Error())
