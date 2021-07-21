@@ -42,3 +42,7 @@ func Up(c *gin.Context) {
 func Down(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.ChangeSort(c, enum.ChangeSortTypeDown))
 }
+
+func EditMarkdown(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.EditMarkdown(c))
+}

@@ -12,6 +12,7 @@ import (
 	"os"
 	"sync"
 	"yiu/yiu-reader/bean"
+	EditSoftDao "yiu/yiu-reader/dao/edit-soft-dao"
 	MainDao "yiu/yiu-reader/dao/main-dao"
 	NoteDao "yiu/yiu-reader/dao/note-dao"
 	WorkspaceDao "yiu/yiu-reader/dao/workspace-dao"
@@ -205,6 +206,55 @@ func Position(c *gin.Context) response.YiuReaderResponse {
 	err = yiuOs.DoOpenFileManagerByParent(target.AbsPath)
 	if err != nil {
 		bean.GetLoggerBean().Error("打开文件管理器失败!路径为\""+target.AbsPath+"\"", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func EditMarkdown(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	target, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据ID获取"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	err = target.CheckPath()
+	if err != nil {
+		bean.GetLoggerBean().Error(target.Name+"文件不存在!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	softId, err := MainDao.GetEditSoftId()
+	if err != nil {
+		bean.GetLoggerBean().Error("根据当前编辑软件ID出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	soft, err := EditSoftDao.FindById(softId)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据当前编辑软件出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	err = soft.CheckPath()
+	if err != nil {
+		bean.GetLoggerBean().Error(soft.Name+"文件不存在!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	cmd := yiuOs.GetCmdWithPrefix(soft.Path + " " + target.AbsPath)
+	err = cmd.Start()
+	if err != nil {
+		bean.GetLoggerBean().Error("使用默认编辑器启动文件异常", zap.Error(err))
 		result.ToError(err.Error())
 		return result
 	}
