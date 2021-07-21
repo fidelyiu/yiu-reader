@@ -50,3 +50,11 @@ func GetSidebarStatus(c *gin.Context) {
 func SetSidebarStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, MainService.SetSidebarStatus(c))
 }
+
+func GetEditSoft(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.GetEditSoft())
+}
+
+func SetEditSoft(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.SetEditSoft(c))
+}

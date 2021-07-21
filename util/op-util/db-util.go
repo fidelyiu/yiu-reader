@@ -70,7 +70,7 @@ func OpenBoltDB(dbPath string) (*bbolt.DB, error) {
 		if createErr != nil {
 			return createErr
 		}
-		_, createErr = tx.CreateBucketIfNotExists([]byte(FieldUtil.ImageCacheTable))
+		_, createErr = tx.CreateBucketIfNotExists([]byte(FieldUtil.EditSoftTable))
 		if createErr != nil {
 			return createErr
 		}

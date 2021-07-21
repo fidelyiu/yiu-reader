@@ -3,6 +3,7 @@ package FieldUtil
 const (
 	MainTable               = "main"                 // 主表
 	CurrentWorkspaceIdField = "current_workspace_id" // 当前工作空间
+	CurrentEditId           = "current_edit_soft_id" // 当前编辑软件
 	SidebarStatusField      = "sidebar_status"       // 侧边栏状态
 	MainBoxShowBtnText      = "main_box_show_text"   // 主盒子_展示按钮提示
 	MainBoxShowIcon         = "main_box_show_icon"   // 主盒子_展示图标

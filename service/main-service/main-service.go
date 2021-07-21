@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"yiu/yiu-reader/bean"
+	EditSoftDao "yiu/yiu-reader/dao/edit-soft-dao"
 	MainDao "yiu/yiu-reader/dao/main-dao"
 	WorkspaceDao "yiu/yiu-reader/dao/workspace-dao"
 	"yiu/yiu-reader/model/enum"
@@ -183,6 +184,58 @@ func SetSidebarStatus(c *gin.Context) response.YiuReaderResponse {
 		return result
 	}
 	result.Result = body.SidebarStatus
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetEditSoft() response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	editSoftId, err := MainDao.GetEditSoftId()
+	if err != nil {
+		bean.GetLoggerBean().Error("获取当前编辑软件失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	editSoft, err := EditSoftDao.FindById(editSoftId)
+	if err != nil {
+		bean.GetLoggerBean().Error("获取当前编辑软件失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	_ = editSoft.CheckPath()
+	result.Result = editSoft
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetEditSoft(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	editSoftId := c.Param("id")
+	if editSoftId == "" {
+		emptyError := errors.New("id字段不能为空")
+		bean.GetLoggerBean().Error("设置当前编辑软件失败!", zap.Error(emptyError))
+		result.ToError(emptyError.Error())
+		return result
+	}
+	currentEditSoft, err := EditSoftDao.FindById(editSoftId)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置当前编辑软件失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = currentEditSoft.CheckPath()
+	if err != nil {
+		bean.GetLoggerBean().Error(editSoftId+"对应的编辑软件路径无效!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = MainDao.SetEditSoftId(editSoftId)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置当前编辑软件失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = currentEditSoft
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

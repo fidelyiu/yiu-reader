@@ -37,6 +37,8 @@ func main() {
 		mainGroup.PUT("/main/box/num", MainController.SetMainBoxShowNum)
 		mainGroup.GET("/sidebar/status", MainController.GetSidebarStatus)
 		mainGroup.PUT("/sidebar/status", MainController.SetSidebarStatus)
+		mainGroup.GET("/edit/soft", MainController.GetEditSoft)
+		mainGroup.PUT("/edit/soft/:id", MainController.SetEditSoft)
 	}
 
 	workspaceGroup := router.Group("/workspace")

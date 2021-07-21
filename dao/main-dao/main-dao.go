@@ -6,6 +6,7 @@ import (
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"go.etcd.io/bbolt"
 	"yiu/yiu-reader/bean"
+	EditSoftDao "yiu/yiu-reader/dao/edit-soft-dao"
 	WorkspaceDao "yiu/yiu-reader/dao/workspace-dao"
 	FieldUtil "yiu/yiu-reader/util/field-util"
 )
@@ -109,4 +110,26 @@ func getMainTableByKey(key, errStr string) ([]byte, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+// GetEditSoftId 获取当前编辑软件的Id
+func GetEditSoftId() (string, error) {
+	bytes, err := getMainTableByKey(FieldUtil.CurrentEditId, "无当前编辑软件")
+	if err != nil {
+		return "", err
+	}
+	result := string(bytes)
+	return result, nil
+}
+
+// SetEditSoftId 设置当前编辑软件
+func SetEditSoftId(id string) error {
+	if id == "" {
+		return errors.New("修改当前编辑软件ID失败，修改key不能为空")
+	}
+	editSoft, err := EditSoftDao.FindById(id)
+	if err != nil || editSoft.CheckPath() != nil {
+		return errors.New("设置的编辑软件无效")
+	}
+	return setMainTableByKey(FieldUtil.CurrentEditId, id)
 }

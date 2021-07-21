@@ -12,6 +12,9 @@ func FindAllByTableName(db *bbolt.DB, tableName string) ([]string, error) {
 	result := make([]string, 0)
 	err := db.View(func(tx *bbolt.Tx) error {
 		table := GetTableByName(tx, tableName)
+		if table == nil {
+			return nil
+		}
 		err := table.ForEach(func(k, v []byte) error {
 			result = append(result, string(v))
 			return nil
