@@ -39,6 +39,7 @@ func main() {
 		mainGroup.PUT("/sidebar/status", MainController.SetSidebarStatus)
 		mainGroup.GET("/edit/soft", MainController.GetEditSoft)
 		mainGroup.PUT("/edit/soft/:id", MainController.SetEditSoft)
+		mainGroup.GET("/os/pathSeparator", MainController.GetOsPathSeparator)
 	}
 
 	workspaceGroup := router.Group("/workspace")
@@ -65,6 +66,7 @@ func main() {
 
 	noteGroup := router.Group("/note")
 	{
+		noteGroup.POST("", NoteController.Add)
 		noteGroup.GET("/refresh", NoteController.Refresh)
 		noteGroup.POST("/tree", NoteController.SearchTree)
 		noteGroup.GET("", NoteController.Search)

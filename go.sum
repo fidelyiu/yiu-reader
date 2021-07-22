@@ -13,6 +13,10 @@ github.com/fidelyiu/yiu-go-tool v1.1.9 h1:iMWYAX5MeC1Muq2UlAjlnDPrdPGXke4PF8IJuA
 github.com/fidelyiu/yiu-go-tool v1.1.9/go.mod h1:WIXj//r6TbybRgHyN1I3qCsWUJJMddehf6U+mDcAUYI=
 github.com/fidelyiu/yiu-go-tool v1.1.10 h1:gjY2gJYZOQUhWyh0jbQyU06T7m+gBZyBrNzrnswmsvY=
 github.com/fidelyiu/yiu-go-tool v1.1.10/go.mod h1:WIXj//r6TbybRgHyN1I3qCsWUJJMddehf6U+mDcAUYI=
+github.com/fidelyiu/yiu-go-tool v1.1.11 h1:SbrbxE1n3++cqLJnmiVF4xMoLzkGdPcLvR4Njck+WCo=
+github.com/fidelyiu/yiu-go-tool v1.1.11/go.mod h1:WIXj//r6TbybRgHyN1I3qCsWUJJMddehf6U+mDcAUYI=
+github.com/fidelyiu/yiu-go-tool v1.1.12 h1:gm1p55yuita76JGs6pQsNhgO6UkyVbT+avjFd3Zg/bA=
+github.com/fidelyiu/yiu-go-tool v1.1.12/go.mod h1:WIXj//r6TbybRgHyN1I3qCsWUJJMddehf6U+mDcAUYI=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.7.2 h1:Tg03T9yM2xa8j6I3Z3oqLaQRSmKvxPd6g/2HJ6zICFA=

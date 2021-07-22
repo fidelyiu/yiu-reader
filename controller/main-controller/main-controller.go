@@ -58,3 +58,7 @@ func GetEditSoft(c *gin.Context) {
 func SetEditSoft(c *gin.Context) {
 	c.JSON(http.StatusOK, MainService.SetEditSoft(c))
 }
+
+func GetOsPathSeparator(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.GetOsPathSeparator())
+}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
+	"github.com/go-basic/uuid"
 	"go.etcd.io/bbolt"
 	"sort"
 	"yiu/yiu-reader/bean"
@@ -339,4 +340,13 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 	// 提交事务
 	err = tx.Commit()
 	return err
+}
+
+func Save(entity *entity.Note) error {
+	entity.Id = uuid.New()
+	buf, err := json.Marshal(entity)
+	if err != nil {
+		return err
+	}
+	return dao.SaveByTableNameAndKey(bean.GetDbBean(), tableName, entity.Id, buf, entityName)
 }

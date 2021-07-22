@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	yiuSErr "github.com/fidelyiu/yiu-go-tool/error_s"
 	"yiu/yiu-reader/model/enum"
 	PathUtil "yiu/yiu-reader/util/path-util"
 )
@@ -39,4 +40,10 @@ func (n *Note) CheckPath() error {
 	}
 	n.Status = enum.ObjStatusValid
 	return nil
+}
+
+func (n *Note) Check() error {
+	return yiuSErr.ToErrorBySep(" & ",
+		n.CheckPath(),
+	)
 }

@@ -2,6 +2,8 @@ package NoteService
 
 import (
 	"encoding/json"
+	yiuDir "github.com/fidelyiu/yiu-go-tool/dir"
+	yiuFile "github.com/fidelyiu/yiu-go-tool/file"
 	yiuOs "github.com/fidelyiu/yiu-go-tool/os"
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"github.com/gin-gonic/gin"
@@ -413,6 +415,105 @@ func ChangeSort(c *gin.Context, changeType enum.ChangeSortType) response.YiuRead
 		result.ToError(err.Error())
 		return result
 	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func Add(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	var addEntity entity.Note
+	err := c.ShouldBindJSON(&addEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("添加"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	if !addEntity.IsDir {
+		addEntity.Name += ".md"
+	}
+
+	// 设置 workspaceId
+	if yiuStr.IsBlank(addEntity.WorkspaceId) {
+		addEntity.WorkspaceId, err = MainDao.GetCurrentWorkspaceId()
+		if err != nil {
+			bean.GetLoggerBean().Error("获取当前工作空间ID失败!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+	}
+	workspace, wErr := WorkspaceDao.FindById(addEntity.WorkspaceId)
+	if wErr != nil {
+		bean.GetLoggerBean().Error("无效的工作空间ID!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	// 设置 parentId
+	if yiuStr.IsNotBlank(addEntity.ParentId) {
+		parentEntity, pErr := NoteDao.FindById(addEntity.ParentId)
+		if pErr != nil {
+			bean.GetLoggerBean().Error("无效的父笔记ID!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+		addEntity.ParentAbsPath = parentEntity.AbsPath
+		addEntity.AbsPath = parentEntity.AbsPath + string(os.PathSeparator) + addEntity.Name
+		addEntity.Path = parentEntity.Path + string(os.PathSeparator) + addEntity.Name
+		addEntity.Level = parentEntity.Level + 1
+	} else {
+		addEntity.ParentId = ""
+		addEntity.ParentAbsPath = ""
+		addEntity.AbsPath = workspace.Path + string(os.PathSeparator) + addEntity.Name
+		addEntity.Path = string(os.PathSeparator) + addEntity.Name
+		addEntity.Level = 1
+	}
+	addEntity.ParentPath = string(os.PathSeparator) + addEntity.Name
+	addEntity.Show = true
+
+	// 写入硬盘
+	if addEntity.IsDir {
+		if yiuDir.IsExists(addEntity.AbsPath) {
+			bean.GetLoggerBean().Error(addEntity.AbsPath+"目录已存在!", zap.Error(err))
+			result.ToError(addEntity.AbsPath + "目录已存在!")
+			return result
+		}
+		dErr := yiuDir.DoMkDir(addEntity.AbsPath)
+		if dErr != nil {
+			bean.GetLoggerBean().Error("创建"+addEntity.AbsPath+"目录出错!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+	} else {
+		if yiuFile.IsExists(addEntity.AbsPath) {
+			bean.GetLoggerBean().Error(addEntity.AbsPath+"文件已存在!", zap.Error(err))
+			result.ToError(addEntity.AbsPath + "文件已存在!")
+			return result
+		}
+		fErr := yiuFile.DoCreate(addEntity.AbsPath)
+		if fErr != nil {
+			bean.GetLoggerBean().Error("创建"+addEntity.AbsPath+"文件出错!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+	}
+
+	// 检查
+	err = addEntity.Check()
+	if err != nil {
+		bean.GetLoggerBean().Error("添加"+serviceName+"出错，参数检查错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	err = NoteDao.Save(&addEntity)
+
+	if err != nil {
+		bean.GetLoggerBean().Error("添加"+serviceName+"出错，数据库层错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

@@ -7,6 +7,10 @@ import (
 	NoteService "yiu/yiu-reader/service/note-service"
 )
 
+func Add(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Add(c))
+}
+
 func Refresh(c *gin.Context) {
 	NoteService.Refresh(c)
 }

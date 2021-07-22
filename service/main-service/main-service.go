@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"os"
 	"yiu/yiu-reader/bean"
 	EditSoftDao "yiu/yiu-reader/dao/edit-soft-dao"
 	MainDao "yiu/yiu-reader/dao/main-dao"
@@ -236,6 +237,13 @@ func SetEditSoft(c *gin.Context) response.YiuReaderResponse {
 		return result
 	}
 	result.Result = currentEditSoft
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetOsPathSeparator() response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	result.Result = os.PathSeparator
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
