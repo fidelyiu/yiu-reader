@@ -586,3 +586,41 @@ func View(c *gin.Context) response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func Reade(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	readeEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = readeEntity.Check()
+	if err != nil {
+		bean.GetLoggerBean().Error("检查"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	file, err := os.Open(readeEntity.AbsPath)
+	if err != nil {
+		bean.GetLoggerBean().Error("打开"+serviceName+"文件出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		bean.GetLoggerBean().Error("读取"+serviceName+"文件出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	result.Result = string(content)
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

@@ -62,3 +62,7 @@ func Down(c *gin.Context) {
 func EditMarkdown(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.EditMarkdown(c))
 }
+
+func Reade(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Reade(c))
+}

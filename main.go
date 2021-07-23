@@ -80,6 +80,7 @@ func main() {
 		noteGroup.PUT("/up/:id", NoteController.Up)
 		noteGroup.PUT("/down/:id", NoteController.Down)
 		noteGroup.GET("/edit/md/:id", NoteController.EditMarkdown)
+		noteGroup.GET("/reade/:id", NoteController.Reade)
 	}
 
 	editSoftGroup := router.Group("/edit/soft")
