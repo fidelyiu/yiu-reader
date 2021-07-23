@@ -517,3 +517,36 @@ func Add(c *gin.Context) response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func Update(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	var updateEntity entity.Note
+	err := c.ShouldBindJSON(&updateEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("修改"+serviceName+"出错，Body参数转换出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = NoteDao.RenameNote(updateEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("修改"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func View(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	viewEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = viewEntity
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

@@ -6,13 +6,16 @@ import (
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
 	"github.com/go-basic/uuid"
 	"go.etcd.io/bbolt"
+	"os"
 	"sort"
 	"yiu/yiu-reader/bean"
 	"yiu/yiu-reader/dao"
 	"yiu/yiu-reader/model/dto"
 	"yiu/yiu-reader/model/entity"
 	"yiu/yiu-reader/model/enum"
+	"yiu/yiu-reader/model/vo"
 	FieldUtil "yiu/yiu-reader/util/field-util"
+	NoteUtil "yiu/yiu-reader/util/note-util"
 )
 
 const (
@@ -349,4 +352,100 @@ func Save(entity *entity.Note) error {
 		return err
 	}
 	return dao.SaveByTableNameAndKey(bean.GetDbBean(), tableName, entity.Id, buf, entityName)
+}
+
+func RenameNote(updateEntity entity.Note) error {
+	if updateEntity.Id == "" {
+		return errors.New("笔记ID不能为空")
+	}
+	dbEntity, err := FindById(updateEntity.Id)
+	if err != nil {
+		return err
+	}
+
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+	dbEntity.Alias = updateEntity.Alias
+	if dbEntity.Name != updateEntity.Name {
+		originalAbsPath := dbEntity.AbsPath
+		// 修改了名称
+		dbEntity.Path = yiuStr.GetReplaceEndStr(
+			dbEntity.Path,
+			string(os.PathSeparator)+dbEntity.Name,
+			string(os.PathSeparator)+updateEntity.Name)
+		dbEntity.AbsPath = yiuStr.GetReplaceEndStr(
+			dbEntity.AbsPath,
+			string(os.PathSeparator)+dbEntity.Name,
+			string(os.PathSeparator)+updateEntity.Name)
+		dbEntity.ParentPath = yiuStr.GetReplaceEndStr(
+			dbEntity.ParentPath,
+			string(os.PathSeparator)+dbEntity.Name,
+			string(os.PathSeparator)+updateEntity.Name)
+		renameErr := os.Rename(originalAbsPath, dbEntity.AbsPath)
+		if renameErr != nil {
+			return renameErr
+		}
+		// 如果是文件
+		if dbEntity.IsDir {
+			allNote, allErr := FindAll()
+			if allErr != nil {
+				return allErr
+			}
+			child := NoteUtil.GetChild(dbEntity, allNote, false)
+			renameChildErr := renameChild(dbEntity, child, table)
+			if renameChildErr != nil {
+				return renameChildErr
+			}
+		}
+	}
+
+	entityMarshal, err := json.Marshal(dbEntity)
+	if err != nil {
+		return err
+	}
+
+	err = table.Put([]byte(dbEntity.Id), entityMarshal)
+	if err != nil {
+		return err
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	return err
+}
+
+func renameChild(parent entity.Note, ch []vo.NoteTreeVo, table *bbolt.Bucket) error {
+	if len(ch) == 0 {
+		return nil
+	}
+	for i := range ch {
+		item := ch[i].Data
+		item.AbsPath = parent.AbsPath + string(os.PathSeparator) + item.Name
+		item.Path = parent.Path + string(os.PathSeparator) + item.Name
+		item.ParentAbsPath = parent.AbsPath
+		itemMarshal, err := json.Marshal(item)
+		if err != nil {
+			return err
+		}
+		err = table.Put([]byte(item.Id), itemMarshal)
+		if err != nil {
+			return err
+		}
+		if len(ch[i].Child) != 0 {
+			err := renameChild(item, ch[i].Child, table)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

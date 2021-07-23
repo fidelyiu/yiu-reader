@@ -67,6 +67,8 @@ func main() {
 	noteGroup := router.Group("/note")
 	{
 		noteGroup.POST("", NoteController.Add)
+		noteGroup.PUT("", NoteController.Update)
+		noteGroup.GET("/:id", NoteController.View)
 		noteGroup.GET("/refresh", NoteController.Refresh)
 		noteGroup.POST("/tree", NoteController.SearchTree)
 		noteGroup.GET("", NoteController.Search)

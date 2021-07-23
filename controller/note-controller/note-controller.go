@@ -11,6 +11,14 @@ func Add(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.Add(c))
 }
 
+func Update(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.Update(c))
+}
+
+func View(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.View(c))
+}
+
 func Refresh(c *gin.Context) {
 	NoteService.Refresh(c)
 }
