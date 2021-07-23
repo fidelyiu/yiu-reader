@@ -108,19 +108,28 @@ func FindBySearchDto(dto dto.NoteSearchDto) ([]entity.Note, error) {
 			appendItem := true
 			_ = resultItem.CheckPath()
 
-			// 工作空间ID
-			if yiuStr.IsNotBlank(dto.WorkspaceId) && resultItem.WorkspaceId != dto.WorkspaceId {
-				appendItem = false
-			}
-			// 父路径
-			if yiuStr.IsNotBlank(dto.ParentId) && resultItem.ParentId != dto.ParentId {
+			// 状态
+			if dto.ObjStatus != enum.ObjStatusNoValue && dto.ObjStatus != resultItem.Status {
 				appendItem = false
 			}
 
-			if dto.Show && !resultItem.Show {
+			// 工作空间ID
+			if appendItem && yiuStr.IsNotBlank(dto.WorkspaceId) && resultItem.WorkspaceId != dto.WorkspaceId {
 				appendItem = false
 			}
-			if dto.NotShow && resultItem.Show {
+			// 父路径
+			if appendItem && yiuStr.IsNotBlank(dto.ParentId) && resultItem.ParentId != dto.ParentId {
+				appendItem = false
+			}
+
+			if appendItem && dto.Level != 0 && resultItem.Level != dto.Level {
+				appendItem = false
+			}
+
+			if appendItem && dto.Show && !resultItem.Show {
+				appendItem = false
+			}
+			if appendItem && dto.NotShow && resultItem.Show {
 				appendItem = false
 			}
 
@@ -168,7 +177,7 @@ func DeleteById(id string) error {
 	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
 }
 
-func DeleteDeepById(id string) error {
+func DeleteByIds(ids []string) error {
 	// 开始事务
 	tx, err := bean.GetDbBean().Begin(true)
 	if err != nil {
@@ -180,7 +189,36 @@ func DeleteDeepById(id string) error {
 	}(tx)
 	// 获取表
 	table := dao.GetTableByName(tx, tableName)
-	err = deleteDeepById(id, table)
+	for i := range ids {
+		err = table.Delete([]byte(ids[i]))
+	}
+	if err != nil {
+		return err
+	}
+	// 提交事务
+	err = tx.Commit()
+	return err
+}
+
+func DeleteDeepById(id string) error {
+	return DeleteDeepByIds([]string{id})
+}
+
+func DeleteDeepByIds(ids []string) error {
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+	for i := range ids {
+		err = deleteDeepById(ids[i], table)
+	}
 	if err != nil {
 		return err
 	}
@@ -282,6 +320,9 @@ func ChangeSort(id string, changeType enum.ChangeSortType) error {
 
 	// 排序
 	sort.Slice(brotherList, func(i, j int) bool {
+		if brotherList[j].SortNum != 0 {
+			return false
+		}
 		if brotherList[i].SortNum == 0 {
 			return brotherList[i].Id == target.Id
 		}

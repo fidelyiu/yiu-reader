@@ -6,6 +6,7 @@ type NoteSearchDto struct {
 	ObjStatus   enum.ObjStatus `json:"objStatus" form:"objStatus"`     // note状态
 	Path        string         `json:"path" form:"path"`               // 路径
 	ParentId    string         `json:"parentId" form:"parentId"`       // 父 note ID
+	Level       int            `json:"level" form:"level"`             // 等级
 	Show        bool           `json:"show" form:"show"`               // show为true的note
 	NotShow     bool           `json:"notShow" form:"notShow"`         // show为false的note
 	WorkspaceId string         `json:"workspaceId" form:"workspaceId"` // 工作空间ID

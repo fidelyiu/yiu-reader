@@ -74,6 +74,7 @@ func main() {
 		noteGroup.GET("", NoteController.Search)
 		noteGroup.DELETE("/:id", NoteController.Delete)
 		noteGroup.DELETE("/file/:id", NoteController.DeleteFile)
+		noteGroup.DELETE("/bad/:id", NoteController.DeleteBad)
 		noteGroup.GET("/position/:id", NoteController.Position)
 		noteGroup.GET("/change/show/:id", NoteController.ChangeShow)
 		noteGroup.PUT("/up/:id", NoteController.Up)

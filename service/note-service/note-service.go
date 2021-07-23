@@ -296,6 +296,42 @@ func DeleteFile(c *gin.Context) response.YiuReaderResponse {
 	return result
 }
 
+func DeleteBad(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+
+	searchDto := dto.NoteSearchDto{}
+	if id == "" {
+		wId, err := MainDao.GetCurrentWorkspaceId()
+		if err != nil {
+			bean.GetLoggerBean().Error("获取当前工作空间失败!", zap.Error(err))
+			result.ToError(err.Error())
+			return result
+		}
+		id = wId
+	}
+	searchDto.WorkspaceId = id
+	searchDto.ObjStatus = enum.ObjStatusInvalid
+	allNote, err := NoteDao.FindBySearchDto(searchDto)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询所有"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	var ids []string
+	for i := range allNote {
+		ids = append(ids, allNote[i].Id)
+	}
+	delErr := NoteDao.DeleteByIds(ids)
+	if delErr != nil {
+		bean.GetLoggerBean().Error("删除"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
 func deleteFileByTargetAndItChild(target entity.Note, child []vo.NoteTreeVo) error {
 	if len(child) != 0 {
 		for i := range child {
