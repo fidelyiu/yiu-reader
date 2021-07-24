@@ -6,6 +6,7 @@ import (
 	yiuFile "github.com/fidelyiu/yiu-go-tool/file"
 	yiuOs "github.com/fidelyiu/yiu-go-tool/os"
 	yiuStr "github.com/fidelyiu/yiu-go-tool/string"
+	yiuStrList "github.com/fidelyiu/yiu-go-tool/string_list"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
@@ -590,6 +591,7 @@ func View(c *gin.Context) response.YiuReaderResponse {
 func Reade(c *gin.Context) response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
 	id := c.Param("id")
+	notePageVo := vo.NotePageVo{}
 	readeEntity, err := NoteDao.FindById(id)
 	if err != nil {
 		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
@@ -602,6 +604,9 @@ func Reade(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
+
+	// 笔记信息
+	notePageVo.Note = readeEntity
 
 	file, err := os.Open(readeEntity.AbsPath)
 	if err != nil {
@@ -620,7 +625,75 @@ func Reade(c *gin.Context) response.YiuReaderResponse {
 		return result
 	}
 
-	result.Result = string(content)
+	fileInfo, err := file.Stat()
+	if err != nil {
+		bean.GetLoggerBean().Error("读取"+serviceName+"文件信息出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	notePageVo.ModTime = fileInfo.ModTime()
+	notePageVo.Size = fileInfo.Size()
+
+	// 内容
+	notePageVo.Content = string(content)
+
+	// 所属工作空间
+	workspace, err := WorkspaceDao.FindById(readeEntity.WorkspaceId)
+	if err != nil {
+		bean.GetLoggerBean().Error(serviceName+"所属工作空间ID异常!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = workspace.Check()
+	if err != nil {
+		bean.GetLoggerBean().Error(serviceName+"所属工作空间异常!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	notePageVo.WorkSpace = workspace
+
+	// 父路径
+	notePageVo.ParentName, err = getNoteParentNamePath(readeEntity, []string{}, []string{})
+	if workspace.Alias != "" {
+		notePageVo.ParentName = append(notePageVo.ParentName, workspace.Alias)
+	} else {
+		notePageVo.ParentName = append(notePageVo.ParentName, workspace.Name)
+	}
+
+	yiuStrList.OpReverse(&notePageVo.ParentName)
+
+	if err != nil {
+		bean.GetLoggerBean().Error("读取"+serviceName+"父级名称出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	result.Result = notePageVo
 	result.SetType(enum.ResultTypeSuccess)
 	return result
+}
+
+func getNoteParentNamePath(entity entity.Note, parentName []string, pushId []string) ([]string, error) {
+	// id避免死循环
+	for i := range pushId {
+		if pushId[i] == entity.Id {
+			return parentName, nil
+		}
+	}
+	pushId = append(pushId, entity.Id)
+	if entity.Alias != "" {
+		parentName = append(parentName, entity.Alias)
+	} else {
+		parentName = append(parentName, entity.Name)
+	}
+	if entity.ParentId != "" {
+		parent, err := NoteDao.FindById(entity.ParentId)
+		if err != nil {
+			return nil, err
+		}
+		return getNoteParentNamePath(parent, parentName, pushId)
+	} else {
+		return parentName, nil
+	}
 }
