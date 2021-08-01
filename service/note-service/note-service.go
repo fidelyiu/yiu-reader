@@ -723,13 +723,14 @@ func DirTree(c *gin.Context) response.YiuReaderResponse {
 
 	var searchDto dto.NoteSearchDto
 	searchDto.WorkspaceId = workspace.Id
+	searchDto.Show = true
 	allNote, err := NoteDao.FindBySearchDto(searchDto)
 	if err != nil {
 		bean.GetLoggerBean().Error("根据工作空间ID获取所有笔记失败!", zap.Error(err))
 		result.ToError(err.Error())
 		return result
 	}
-	result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+	result.Result = NoteUtil.GetTree(allNote, true)
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
