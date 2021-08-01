@@ -697,3 +697,39 @@ func getNoteParentNamePath(entity entity.Note, parentName []string, pushId []str
 		return parentName, nil
 	}
 }
+
+func DirTree(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	readeEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = readeEntity.Check()
+	if err != nil {
+		bean.GetLoggerBean().Error("检查"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	workspace, err := WorkspaceDao.FindById(readeEntity.WorkspaceId)
+	if err != nil {
+		bean.GetLoggerBean().Error("MD所属工作空间ID获取失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+
+	var searchDto dto.NoteSearchDto
+	searchDto.WorkspaceId = workspace.Id
+	allNote, err := NoteDao.FindBySearchDto(searchDto)
+	if err != nil {
+		bean.GetLoggerBean().Error("根据工作空间ID获取所有笔记失败!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

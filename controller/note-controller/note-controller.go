@@ -66,3 +66,7 @@ func EditMarkdown(c *gin.Context) {
 func Reade(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.Reade(c))
 }
+
+func DirTree(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.DirTree(c))
+}
