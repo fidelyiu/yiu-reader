@@ -133,3 +133,42 @@ func SetEditSoftId(id string) error {
 	}
 	return setMainTableByKey(FieldUtil.CurrentEditId, id)
 }
+
+func GetNoteTextDocument() (bool, error) {
+	bytes, err := getMainTableByKey(FieldUtil.NoteTextDocument, "暂未笔记页面文档文字提示Key")
+	if err != nil {
+		return true, err
+	}
+	result := yiuStr.IsTrue(string(bytes))
+	return result, nil
+}
+
+func SetNoteTextDocument(b bool) error {
+	return setMainTableByKey(FieldUtil.NoteTextDocument, yiuBool.ToStr(b))
+}
+
+func GetNoteTextMainPoint() (bool, error) {
+	bytes, err := getMainTableByKey(FieldUtil.NoteTextMainPoint, "暂未笔记页面大纲文字提示Key")
+	if err != nil {
+		return true, err
+	}
+	result := yiuStr.IsTrue(string(bytes))
+	return result, nil
+}
+
+func SetNoteTextMainPoint(b bool) error {
+	return setMainTableByKey(FieldUtil.NoteTextMainPoint, yiuBool.ToStr(b))
+}
+
+func GetNoteTextDir() (bool, error) {
+	bytes, err := getMainTableByKey(FieldUtil.NoteTextDir, "暂未笔记页面目录文字提示Key")
+	if err != nil {
+		return true, err
+	}
+	result := yiuStr.IsTrue(string(bytes))
+	return result, nil
+}
+
+func SetNoteTextDir(b bool) error {
+	return setMainTableByKey(FieldUtil.NoteTextDir, yiuBool.ToStr(b))
+}

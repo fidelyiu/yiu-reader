@@ -40,6 +40,12 @@ func main() {
 		mainGroup.GET("/edit/soft", MainController.GetEditSoft)
 		mainGroup.PUT("/edit/soft/:id", MainController.SetEditSoft)
 		mainGroup.GET("/os/pathSeparator", MainController.GetOsPathSeparator)
+		mainGroup.GET("/note/txt/document", MainController.GetNoteTextDocument)
+		mainGroup.PUT("/note/txt/document", MainController.SetNoteTextDocument)
+		mainGroup.GET("/note/txt/main/point", MainController.GetNoteTextMainPoint)
+		mainGroup.PUT("/note/txt/main/point", MainController.SetNoteTextMainPoint)
+		mainGroup.GET("/note/txt/dir", MainController.GetNoteTextDir)
+		mainGroup.PUT("/note/txt/dir", MainController.SetNoteTextDir)
 	}
 
 	workspaceGroup := router.Group("/workspace")
@@ -82,6 +88,13 @@ func main() {
 		noteGroup.GET("/edit/md/:id", NoteController.EditMarkdown)
 		noteGroup.GET("/reade/:id", NoteController.Reade)
 		noteGroup.GET("/dir/tree/:id", NoteController.DirTree)
+		noteGroup.GET("/num/document/:id", NoteController.GetNumDocument)
+		noteGroup.PUT("/num/document", NoteController.SetNumDocument)
+		noteGroup.GET("/num/main/point/:id", NoteController.GetNumMainPoint)
+		noteGroup.PUT("/num/main/point", NoteController.SetNumMainPoint)
+		noteGroup.GET("/num/dir/:id", NoteController.GetNumDir)
+		noteGroup.PUT("/num/dir", NoteController.SetNumDir)
+
 	}
 
 	editSoftGroup := router.Group("/edit/soft")

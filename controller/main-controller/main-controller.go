@@ -62,3 +62,27 @@ func SetEditSoft(c *gin.Context) {
 func GetOsPathSeparator(c *gin.Context) {
 	c.JSON(http.StatusOK, MainService.GetOsPathSeparator())
 }
+
+func GetNoteTextDocument(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.GetNoteTextDocument())
+}
+
+func SetNoteTextDocument(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.SetNoteTextDocument(c))
+}
+
+func GetNoteTextMainPoint(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.GetNoteTextMainPoint())
+}
+
+func SetNoteTextMainPoint(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.SetNoteTextMainPoint(c))
+}
+
+func GetNoteTextDir(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.GetNoteTextDir())
+}
+
+func SetNoteTextDir(c *gin.Context) {
+	c.JSON(http.StatusOK, MainService.SetNoteTextDir(c))
+}

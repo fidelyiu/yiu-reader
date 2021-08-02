@@ -247,3 +247,96 @@ func GetOsPathSeparator() response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func GetNoteTextDocument() response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	menuOpen, _ := MainDao.GetNoteTextDocument()
+	result.Result = menuOpen
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNoteTextDocument(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		NoteTextDocument bool `json:"noteTextDocument" form:"noteTextDocument"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = MainDao.SetNoteTextDocument(body.NoteTextDocument)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置笔记页面文档工具文字是否提示错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = body.NoteTextDocument
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetNoteTextMainPoint() response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	menuOpen, _ := MainDao.GetNoteTextMainPoint()
+	result.Result = menuOpen
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNoteTextMainPoint(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		NoteTextMainPoint bool `json:"noteTextMainPoint" form:"noteTextMainPoint"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = MainDao.SetNoteTextMainPoint(body.NoteTextMainPoint)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置笔记页面大纲工具文字是否提示错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = body.NoteTextMainPoint
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetNoteTextDir() response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	menuOpen, _ := MainDao.GetNoteTextDir()
+	result.Result = menuOpen
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNoteTextDir(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		NoteTextDir bool `json:"noteTextDir" form:"noteTextDir"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	err = MainDao.SetNoteTextDir(body.NoteTextDir)
+	if err != nil {
+		bean.GetLoggerBean().Error("设置笔记页面目录工具文字是否提示错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = body.NoteTextDir
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

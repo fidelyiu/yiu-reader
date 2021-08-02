@@ -734,3 +734,135 @@ func DirTree(c *gin.Context) response.YiuReaderResponse {
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
+
+func GetNumDocument(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	readeEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = readeEntity.ShowDocumentNum
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNumDocument(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		Id          string `json:"id" form:"id"`
+		NumDocument bool   `json:"numDocument" form:"numDocument"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity, err := NoteDao.FindById(body.Id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity.ShowDocumentNum = body.NumDocument
+	err = NoteDao.Update(&readeEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("更新"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetNumMainPoint(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	readeEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = readeEntity.ShowMainPointNum
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNumMainPoint(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		Id           string `json:"id" form:"id"`
+		NumMainPoint bool   `json:"numMainPoint" form:"numMainPoint"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity, err := NoteDao.FindById(body.Id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity.ShowMainPointNum = body.NumMainPoint
+	err = NoteDao.Update(&readeEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("更新"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func GetNumDir(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	id := c.Param("id")
+	readeEntity, err := NoteDao.FindById(id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.Result = readeEntity.ShowDirNum
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}
+
+func SetNumDir(c *gin.Context) response.YiuReaderResponse {
+	result := response.YiuReaderResponse{}
+	type bodyStruct struct {
+		Id     string `json:"id" form:"id"`
+		NumDir bool   `json:"numDir" form:"numDir"`
+	}
+	var body bodyStruct
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		bean.GetLoggerBean().Error("结构体绑定错误!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity, err := NoteDao.FindById(body.Id)
+	if err != nil {
+		bean.GetLoggerBean().Error("查询"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	readeEntity.ShowDirNum = body.NumDir
+	err = NoteDao.Update(&readeEntity)
+	if err != nil {
+		bean.GetLoggerBean().Error("更新"+serviceName+"出错!", zap.Error(err))
+		result.ToError(err.Error())
+		return result
+	}
+	result.SetType(enum.ResultTypeSuccess)
+	return result
+}

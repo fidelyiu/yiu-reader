@@ -70,3 +70,27 @@ func Reade(c *gin.Context) {
 func DirTree(c *gin.Context) {
 	c.JSON(http.StatusOK, NoteService.DirTree(c))
 }
+
+func GetNumDocument(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.GetNumDocument(c))
+}
+
+func SetNumDocument(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.SetNumDocument(c))
+}
+
+func GetNumMainPoint(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.GetNumMainPoint(c))
+}
+
+func SetNumMainPoint(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.SetNumMainPoint(c))
+}
+
+func GetNumDir(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.GetNumDir(c))
+}
+
+func SetNumDir(c *gin.Context) {
+	c.JSON(http.StatusOK, NoteService.SetNumDir(c))
+}
