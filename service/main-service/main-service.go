@@ -250,8 +250,12 @@ func GetOsPathSeparator() response.YiuReaderResponse {
 
 func GetNoteTextDocument() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	menuOpen, _ := MainDao.GetNoteTextDocument()
-	result.Result = menuOpen
+	showTextDocument, err := MainDao.GetNoteTextDocument()
+	if err != nil {
+		result.Result = true
+	} else {
+		result.Result = showTextDocument
+	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
@@ -281,8 +285,12 @@ func SetNoteTextDocument(c *gin.Context) response.YiuReaderResponse {
 
 func GetNoteTextMainPoint() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	menuOpen, _ := MainDao.GetNoteTextMainPoint()
-	result.Result = menuOpen
+	showTextMainPoint, err := MainDao.GetNoteTextMainPoint()
+	if err != nil {
+		result.Result = true
+	} else {
+		result.Result = showTextMainPoint
+	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
@@ -312,8 +320,12 @@ func SetNoteTextMainPoint(c *gin.Context) response.YiuReaderResponse {
 
 func GetNoteTextDir() response.YiuReaderResponse {
 	result := response.YiuReaderResponse{}
-	menuOpen, _ := MainDao.GetNoteTextDir()
-	result.Result = menuOpen
+	showTextDir, err := MainDao.GetNoteTextDir()
+	if err != nil {
+		result.Result = true
+	} else {
+		result.Result = showTextDir
+	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }
