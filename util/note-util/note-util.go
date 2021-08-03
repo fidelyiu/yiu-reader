@@ -50,7 +50,7 @@ func OutNoteByPath(path string,
 				ParentPath:    string(os.PathSeparator) + file.Name(),
 				ParentAbsPath: strings.TrimSuffix(strings.TrimPrefix(path, workspace.Path), string(os.PathSeparator)+file.Name()),
 				Level:         level,
-				Show:          false,
+				Show:          true,
 				IsDir:         false,
 			}
 			tempResult := noteListIsInclude(noteList, tempEntity)
@@ -89,7 +89,7 @@ func OutNoteByPath(path string,
 			ParentPath:    string(os.PathSeparator) + file.Name(),
 			ParentAbsPath: strings.TrimSuffix(path, string(os.PathSeparator)+file.Name()),
 			Level:         level,
-			Show:          false,
+			Show:          true,
 			IsDir:         true,
 		}
 		tempResult := noteListIsInclude(noteList, tempEntity)
@@ -129,7 +129,7 @@ func OutNoteByPath(path string,
 					ParentPath:    string(os.PathSeparator) + v.Name(),
 					ParentAbsPath: path,
 					Level:         level + 1,
-					Show:          false,
+					Show:          true,
 					IsDir:         false,
 				}
 				tempResult := noteListIsInclude(noteList, tempEntity)

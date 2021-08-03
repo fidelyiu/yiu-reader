@@ -42,7 +42,9 @@ func Save(saveEntity *entity.Workspace) error {
 	}
 
 	pathHasInsert := false
-	hasInsertName := ""
+	containItem := false
+	containEdItem := false
+	errName := ""
 	// 查看路径是否已经保存过
 	for _, v := range entityStrList {
 		var entityItem entity.Workspace
@@ -50,14 +52,35 @@ func Save(saveEntity *entity.Workspace) error {
 		if err != nil {
 			continue
 		}
+		_ = entityItem.CheckPath()
+		if entityItem.Status != enum.ObjStatusValid {
+			continue
+		}
+
 		if entityItem.Path == saveEntity.Path {
 			pathHasInsert = true
-			hasInsertName = entityItem.Name
+			errName = entityItem.Name
+			break
+		}
+		if strings.Contains(saveEntity.Path, entityItem.Path) {
+			containItem = true
+			errName = entityItem.Name
+			break
+		}
+		if strings.Contains(entityItem.Path, saveEntity.Path) {
+			containEdItem = true
+			errName = entityItem.Name
 			break
 		}
 	}
 	if pathHasInsert {
-		return errors.New("该路径已保存为'" + hasInsertName + "'，请勿重复保存工作空间")
+		return errors.New("该路径已保存为'" + errName + "'，请勿重复保存工作空间")
+	}
+	if containItem {
+		return errors.New("该路径包含'" + errName + "'工作空间，请勿交叉保存工作空间，这会使文档所属无法定位。")
+	}
+	if containEdItem {
+		return errors.New("该路径被包含在'" + errName + "'工作空间中，请勿交叉保存工作空间，这会使文档所属无法定位。")
 	}
 
 	saveEntity.SortNum = len(entityStrList) + 1
@@ -149,7 +172,54 @@ func Update(updateEntity *entity.Workspace) error {
 }
 
 func DeleteById(id string) error {
-	return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+	// return dao.DeleteByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName)
+	// 开事务删笔记
+	// 检查ID是否有效
+	if !dao.IsEffectiveByTableNameAndKey(bean.GetDbBean(), tableName, id, entityName) {
+		return errors.New("修改" + entityName + "报错，id无效")
+	}
+	// 开始事务
+	tx, err := bean.GetDbBean().Begin(true)
+	if err != nil {
+		return err
+	}
+	// 结尾回滚事务
+	defer func(tx *bbolt.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+	noteTable := dao.GetTableByName(tx, FieldUtil.NoteTable)
+
+	var noteList []entity.Note
+	err = noteTable.ForEach(func(k, v []byte) error {
+		var vItem entity.Note
+		itemErr := json.Unmarshal(v, &vItem)
+		if itemErr != nil {
+			return itemErr
+		}
+		if vItem.WorkspaceId == id {
+			noteList = append(noteList, vItem)
+		}
+		return nil
+	})
+
+	for i := range noteList {
+		delErr := noteTable.Delete([]byte(noteList[i].Id))
+		if delErr != nil {
+			return delErr
+		}
+	}
+
+	// 获取表
+	table := dao.GetTableByName(tx, tableName)
+
+	err = table.Delete([]byte(id))
+	if err != nil {
+		return err
+	}
+
+	// 提交事务
+	err = tx.Commit()
+	return err
 }
 
 func ChangeSort(id string, changeType enum.ChangeSortType) error {
