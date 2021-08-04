@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	DbController "yiu/yiu-reader/controller/db-controller"
 	EditSoftController "yiu/yiu-reader/controller/edit-soft-controller"
 	LayoutController "yiu/yiu-reader/controller/layout-controller"
 	MainController "yiu/yiu-reader/controller/main-controller"
@@ -106,6 +107,11 @@ func main() {
 		editSoftGroup.DELETE("/:id", EditSoftController.Delete)
 		editSoftGroup.PUT("/up/:id", EditSoftController.Up)
 		editSoftGroup.PUT("/down/:id", EditSoftController.Down)
+	}
+
+	dbGroup := router.Group("/db")
+	{
+		dbGroup.POST("", DbController.Search)
 	}
 
 	_ = router.Run(":8080")
