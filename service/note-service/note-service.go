@@ -2,6 +2,7 @@ package NoteService
 
 import (
 	"encoding/json"
+	"errors"
 	yiuDir "github.com/fidelyiu/yiu-go-tool/dir"
 	yiuFile "github.com/fidelyiu/yiu-go-tool/file"
 	yiuOs "github.com/fidelyiu/yiu-go-tool/os"
@@ -147,26 +148,65 @@ func Refresh(c *gin.Context) {
 	}
 
 	// 更新所有父ID
-	allNote, err = NoteDao.FindAll()
+	allNote, err = NoteDao.FindByWorkspaceId(currentWorkspaceId)
 	if err != nil {
 		bean.GetLoggerBean().Error("获取所有笔记失败!", zap.Error(err))
 		return
 	}
+
+	allNoteChan := make(chan entity.Note, len(allNote))
+	var setParentResultNote []entity.Note
+	var setParentResultLock sync.Mutex
+	var downWg sync.WaitGroup
+	downWg.Add(len(allNote))
+	for w := 1; w <= 10; w++ {
+		go setParentWorker(allNoteChan, &setParentResultNote, &setParentResultLock, allNote, &downWg)
+	}
+
 	for i := range allNote {
-		if allNote[i].Level != 1 {
-			parentEntity, err := NoteDao.FindByAbsPath(allNote[i].ParentAbsPath)
+		allNoteChan <- allNote[i]
+	}
+
+	close(allNoteChan)
+	downWg.Wait()
+	err = NoteDao.UpdateBatch(setParentResultNote)
+	if err != nil {
+		bean.GetLoggerBean().Error("批量修改笔记失败!", zap.Error(err))
+	}
+}
+
+func setParentWorker(
+	jobChan <-chan entity.Note,
+	results *[]entity.Note,
+	resultLock *sync.Mutex,
+	allNote []entity.Note,
+	downWg *sync.WaitGroup) {
+	for note := range jobChan {
+		if note.Level != 1 && note.ParentId == "" {
+			parentEntity, err := getNoteByAbsPath(allNote, note.ParentAbsPath)
 			if err != nil {
-				bean.GetLoggerBean().Error("根据"+allNote[i].ParentAbsPath+"找不到笔记!", zap.Error(err))
+				bean.GetLoggerBean().Error("根据"+note.ParentAbsPath+"找不到笔记!", zap.Error(err))
 				continue
 			}
-			allNote[i].ParentId = parentEntity.Id
-			err = NoteDao.Update(&allNote[i])
-			if err != nil {
-				bean.GetLoggerBean().Error("修改笔记错误!", zap.Error(err))
-				continue
-			}
+			note.ParentId = parentEntity.Id
+			resultLock.Lock()
+			*results = append(*results, note)
+			resultLock.Unlock()
+		}
+		downWg.Done()
+	}
+}
+
+func getNoteByAbsPath(allNote []entity.Note, absPath string) (entity.Note, error) {
+	if absPath == "" {
+		return entity.Note{}, errors.New("绝对路径不能为空")
+	}
+	for i := range allNote {
+		if absPath == allNote[i].AbsPath {
+			return allNote[i], nil
 		}
 	}
+	return entity.Note{}, errors.New("无该绝对路径")
 }
 
 func ChangeShow(c *gin.Context) response.YiuReaderResponse {

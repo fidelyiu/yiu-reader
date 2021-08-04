@@ -40,6 +40,32 @@ func FindAll() ([]entity.Note, error) {
 	return result, err
 }
 
+func FindByWorkspaceId(id string) ([]entity.Note, error) {
+	if id == "" {
+		return nil, errors.New("id不能为空")
+	}
+	stringList, err := dao.FindAllByTableName(bean.GetDbBean(), tableName)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]entity.Note, 0)
+	for _, v := range stringList {
+		var resultItem entity.Note
+		err := json.Unmarshal([]byte(v), &resultItem)
+		if err == nil {
+			appendItem := true
+			_ = resultItem.CheckPath()
+			if id != resultItem.WorkspaceId {
+				appendItem = false
+			}
+			if appendItem {
+				result = append(result, resultItem)
+			}
+		}
+	}
+	return result, err
+}
+
 // FindByAbsPath 根据绝对路径找笔记
 func FindByAbsPath(absPath string) (entity.Note, error) {
 	result := entity.Note{}
@@ -83,7 +109,7 @@ func FindByParentId(id string) ([]entity.Note, error) {
 		if err == nil {
 			appendItem := true
 			_ = resultItem.CheckPath()
-			if id == resultItem.ParentId {
+			if id != resultItem.ParentId {
 				appendItem = false
 			}
 			if appendItem {
@@ -171,6 +197,26 @@ func Update(entity *entity.Note) error {
 		return err
 	}
 	return dao.UpdateByTableNameAndKey(bean.GetDbBean(), tableName, entity.Id, buf, entityName)
+}
+
+func UpdateBatch(list []entity.Note) error {
+	return bean.GetDbBean().Batch(func(tx *bbolt.Tx) error {
+		table := dao.GetTableByName(tx, tableName)
+		for i := range list {
+			if list[i].Id == "" {
+				continue
+			}
+			buf, err := json.Marshal(list[i])
+			if err != nil {
+				return err
+			}
+			err = table.Put([]byte(list[i].Id), buf)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func DeleteById(id string) error {
