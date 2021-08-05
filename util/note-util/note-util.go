@@ -163,7 +163,7 @@ func noteListIsInclude(noteList []entity.Note, it entity.Note) enum.NoteReadResu
 	return enum.NoteReadResultNotImport
 }
 
-func GetTree(noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
+func GetTree(noteList []entity.Note, badFileEnd bool, emptyDel bool) []vo.NoteTreeVo {
 	var result []vo.NoteTreeVo
 	if len(noteList) == 0 {
 		return result
@@ -210,23 +210,44 @@ func GetTree(noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
 
 	for i := range result {
 		if result[i].Data.IsDir {
-			result[i].Child = GetChild(result[i].Data, noteList, badFileEnd)
+			result[i].Child = GetChild(result[i].Data, noteList, badFileEnd, emptyDel)
 		}
 	}
-	return result
+
+	var tempResult []vo.NoteTreeVo
+	if emptyDel {
+		for i := range result {
+			if len(result[i].Child) != 0 || !result[i].Data.IsDir {
+				tempResult = append(tempResult, result[i])
+			}
+		}
+		return tempResult
+	} else {
+		return result
+	}
 }
 
-func GetChild(parent entity.Note, noteList []entity.Note, badFileEnd bool) []vo.NoteTreeVo {
+func GetChild(parent entity.Note, noteList []entity.Note, badFileEnd bool, emptyDel bool) []vo.NoteTreeVo {
 	var result []vo.NoteTreeVo
 	if len(noteList) == 0 {
 		return result
 	}
 	for i := range noteList {
 		if noteList[i].ParentId == parent.Id {
-			result = append(result, vo.NoteTreeVo{
-				Data:  noteList[i],
-				Child: GetChild(noteList[i], noteList, badFileEnd),
-			})
+			child := GetChild(noteList[i], noteList, badFileEnd, emptyDel)
+			if emptyDel {
+				if len(child) != 0 || !noteList[i].IsDir {
+					result = append(result, vo.NoteTreeVo{
+						Data:  noteList[i],
+						Child: child,
+					})
+				}
+			} else {
+				result = append(result, vo.NoteTreeVo{
+					Data:  noteList[i],
+					Child: child,
+				})
+			}
 		}
 	}
 	if len(result) != 0 {

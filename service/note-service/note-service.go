@@ -320,7 +320,7 @@ func DeleteFile(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	child := NoteUtil.GetChild(target, allData, false)
+	child := NoteUtil.GetChild(target, allData, false, false)
 	err = deleteFileByTargetAndItChild(target, child)
 	if err != nil {
 		bean.GetLoggerBean().Error("删除"+serviceName+"文件过程中出错，稍后重试!", zap.Error(err))
@@ -468,16 +468,16 @@ func SearchTree(c *gin.Context) response.YiuReaderResponse {
 			result.ToError(allErr.Error())
 			return result
 		}
-		tempList := NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+		tempList := NoteUtil.GetTree(allNote, searchDto.BadFileEnd, false)
 
 		for i := range tempList {
 			if tempList[i].Data.IsDir {
-				tempList[i].Child = NoteUtil.GetChild(tempList[i].Data, tAllNote, searchDto.BadFileEnd)
+				tempList[i].Child = NoteUtil.GetChild(tempList[i].Data, tAllNote, searchDto.BadFileEnd, false)
 			}
 		}
 		result.Result = tempList
 	} else {
-		result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd)
+		result.Result = NoteUtil.GetTree(allNote, searchDto.BadFileEnd, false)
 	}
 	result.SetType(enum.ResultTypeSuccess)
 	return result
@@ -770,7 +770,7 @@ func DirTree(c *gin.Context) response.YiuReaderResponse {
 		result.ToError(err.Error())
 		return result
 	}
-	result.Result = NoteUtil.GetTree(allNote, true)
+	result.Result = NoteUtil.GetTree(allNote, true, true)
 	result.SetType(enum.ResultTypeSuccess)
 	return result
 }

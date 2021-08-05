@@ -487,7 +487,7 @@ func RenameNote(updateEntity entity.Note) error {
 			if allErr != nil {
 				return allErr
 			}
-			child := NoteUtil.GetChild(dbEntity, allNote, false)
+			child := NoteUtil.GetChild(dbEntity, allNote, false, false)
 			renameChildErr := renameChild(dbEntity, child, table)
 			if renameChildErr != nil {
 				return renameChildErr
