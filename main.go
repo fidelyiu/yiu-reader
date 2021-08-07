@@ -22,6 +22,7 @@ func main() {
 	OpUtil.CreateLogger()
 	// 默认路由引擎
 	router := gin.Default()
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 	// 加载静态文件
 	router.Static("/assets", "./dist/assets")
 	err := OpUtil.CreateImageDir()
@@ -30,8 +31,9 @@ func main() {
 		return
 	}
 	router.Static("/image", "./.yiu/image")
-	// index.html
 	router.LoadHTMLFiles("dist/index.html")
+
+	// index.html
 	router.GET("/", MainController.IndexHTML)
 
 	mainGroup := router.Group("/main")
@@ -124,7 +126,7 @@ func main() {
 
 	imgGroup := router.Group("/img")
 	{
-		imgGroup.GET("", ImageController.Get)
+		imgGroup.POST("/upload", ImageController.Upload)
 		imgGroup.GET("/load", ImageController.Load)
 	}
 

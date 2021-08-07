@@ -1,5 +1,7 @@
 package FieldUtil
 
+import "os"
+
 const (
 	MainTable               = "main"                 // 主表
 	CurrentWorkspaceIdField = "current_workspace_id" // 当前工作空间
@@ -16,7 +18,10 @@ const (
 	WorkspaceTable  = "workspace"       // 工作空间表
 	NoteTable       = "note"            // 笔记表
 	ImageCacheTable = "image_cache"     // 图片缓存表
-	ImageAdd        = "./.yiu/image/"   // 图片地址
 	EditSoftTable   = "edit_soft_cache" // 编辑软件表
 	// MarkdownTable   = "markdown"        // Markdown文件表
+
+	ImageAdd = "./" + string(os.PathSeparator) +
+		".yiu" + string(os.PathSeparator) +
+		"image" + string(os.PathSeparator) // 图片地址
 )

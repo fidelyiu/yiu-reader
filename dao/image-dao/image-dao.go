@@ -3,12 +3,9 @@ package ImageDao
 import (
 	"encoding/json"
 	"errors"
-	yiuFile "github.com/fidelyiu/yiu-go-tool/file"
-	yiuTime "github.com/fidelyiu/yiu-go-tool/time"
 	"github.com/go-basic/uuid"
 	"go.etcd.io/bbolt"
 	"os"
-	"path/filepath"
 	"yiu/yiu-reader/bean"
 	"yiu/yiu-reader/dao"
 	"yiu/yiu-reader/model/entity"
@@ -57,12 +54,8 @@ func DeleteFileById(id string) error {
 }
 
 func DeleteFile(image entity.Image) error {
-	err := image.CheckSrc()
-	if err != nil {
-		return err
-	}
-	if image.Id != "" {
-		// 该路径已保存图片，删除后再保存
+	err := image.CheckPath()
+	if err == nil {
 		if image.Status == enum.ObjStatusValid {
 			err = os.Remove(FieldUtil.ImageAdd + image.Path)
 			if err != nil {
@@ -74,44 +67,7 @@ func DeleteFile(image entity.Image) error {
 	return err
 }
 
-func SaveBySrc(src string) error {
-	var err error
-	if !yiuFile.IsExists(src) {
-		return errors.New("路径文件不存在")
-	}
-	dbImage, _ := FindBySrc(src)
-	if dbImage.Status == enum.ObjStatusValid {
-		err = DeleteFile(dbImage)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = DeleteById(dbImage.Id)
-		if err != nil {
-			return err
-		}
-	}
-
-	// 拷贝图片
-	path := yiuTime.GetNowStr21() +
-		string(os.PathSeparator) +
-		yiuTime.GetNowStr22() +
-		filepath.Ext(src)
-	dst := FieldUtil.ImageAdd + path
-	err = yiuFile.DoCopy(src, dst)
-	if err != nil {
-		return err
-	}
-	imageEntity := entity.Image{
-		Path:     path,
-		Src:      src,
-		IsUpload: false,
-	}
-	err = Save(&imageEntity)
-	return err
-}
-
-func FindBySrc(src string) (entity.Image, error) {
+func FindByPath(path string) (entity.Image, error) {
 	result := entity.Image{}
 	hasData := false
 	err := bean.GetDbBean().View(func(tx *bbolt.Tx) error {
@@ -122,7 +78,7 @@ func FindBySrc(src string) (entity.Image, error) {
 			if err != nil {
 				return err
 			}
-			if tempItem.Src == src {
+			if tempItem.Path == path {
 				result = tempItem
 				hasData = true
 			}
@@ -132,7 +88,6 @@ func FindBySrc(src string) (entity.Image, error) {
 	})
 	if hasData {
 		_ = result.CheckPath()
-		_ = result.CheckSrc()
 		return result, err
 	} else {
 		return result, errors.New("未找到图片")
