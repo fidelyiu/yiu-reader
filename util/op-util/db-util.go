@@ -9,6 +9,10 @@ import (
 	FieldUtil "yiu/yiu-reader/util/field-util"
 )
 
+func CreateImageDir() error {
+	return yiuDir.DoMkDirAll(FieldUtil.ImageAdd)
+}
+
 func CreateDB(path string) {
 	db, err := OpenBoltDB(".yiu/yiu-reader.db")
 	if err != nil {

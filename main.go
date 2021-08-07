@@ -1,9 +1,11 @@
 package main
 
 import (
+	yiuLog "github.com/fidelyiu/yiu-go-tool/log"
 	"github.com/gin-gonic/gin"
 	DbController "yiu/yiu-reader/controller/db-controller"
 	EditSoftController "yiu/yiu-reader/controller/edit-soft-controller"
+	ImageController "yiu/yiu-reader/controller/image-controller"
 	LayoutController "yiu/yiu-reader/controller/layout-controller"
 	MainController "yiu/yiu-reader/controller/main-controller"
 	NoteController "yiu/yiu-reader/controller/note-controller"
@@ -22,6 +24,12 @@ func main() {
 	router := gin.Default()
 	// 加载静态文件
 	router.Static("/assets", "./dist/assets")
+	err := OpUtil.CreateImageDir()
+	if err != nil {
+		yiuLog.ErrorLn(err)
+		return
+	}
+	router.Static("/image", "./.yiu/image")
 	// index.html
 	router.LoadHTMLFiles("dist/index.html")
 	router.GET("/", MainController.IndexHTML)
@@ -112,6 +120,12 @@ func main() {
 	dbGroup := router.Group("/db")
 	{
 		dbGroup.POST("", DbController.Search)
+	}
+
+	imgGroup := router.Group("/img")
+	{
+		imgGroup.GET("", ImageController.Get)
+		imgGroup.GET("/load", ImageController.Load)
 	}
 
 	_ = router.Run(":8080")

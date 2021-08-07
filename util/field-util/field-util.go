@@ -16,6 +16,7 @@ const (
 	WorkspaceTable  = "workspace"       // 工作空间表
 	NoteTable       = "note"            // 笔记表
 	ImageCacheTable = "image_cache"     // 图片缓存表
+	ImageAdd        = "./.yiu/image/"   // 图片地址
 	EditSoftTable   = "edit_soft_cache" // 编辑软件表
 	// MarkdownTable   = "markdown"        // Markdown文件表
 )
